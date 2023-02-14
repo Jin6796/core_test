@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <!-- Add a script below this line. -->
+</head>
+<body>
+    <serviceinfos>
+        <serviceinfo serviceid="test1" url="http://localhost:8080/test.do" inputdata="inData1=inputGroup1" outputdata="outData1=outputGroup1" queryparams="" options="type=POST;async=false;timeout=5000;dataType=JSON;charset=UTF-8;headers={}" callback="" beforecall="" aftercall=""></serviceinfo>
+    </serviceinfos>
+    <datafields>
+        <datafield fieldid="edit1" fieldname="input_cond" type="String" size="256"></datafield>
+        <datafield fieldid="a" fieldname="a" type="String" size="256"></datafield>
+        <datafield fieldid="b" fieldname="b" type="String" size="256"></datafield>
+        <datafield fieldid="c" fieldname="c" type="String" size="256"></datafield>
+        <datafield fieldid="d" fieldname="d" type="String" size="256"></datafield>
+        <datafield fieldid="e" fieldname="e" type="String" size="256"></datafield>
+    </datafields>
+    <datagroups>
+        <datagroup groupid="inputGroup1" datafield="edit1"></datagroup>
+        <datagroup groupid="outputGroup1" datafield="a;b;c;d;e"></datagroup>
+    </datagroups>
+    <div id="div1" style="position: absolute; left: 16px; top: 16px; width: 740px; height: 548px; border-width: 3px; border-style: solid; border-color: rgb(173, 216, 230);">
+        <grid id="grid3" style="position: absolute; left: 40px; top: 152px; width: 672px; height: 376px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"conditionalstyle":""
+              ,"group":""
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":false
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"columns" : [
+                {"text":"A","alignment":"center","width":130,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"a","bindFieldId":"a"}
+                ,{"text":"B","alignment":"center","width":130,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"b","bindFieldId":"b"}
+                ,{"text":"C","alignment":"center","width":130,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"c","bindFieldId":"c"}
+                ,{"text":"D","alignment":"center","width":130,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"d","bindFieldId":"d"}
+                ,{"text":"E","alignment":"center","width":130,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"e","bindFieldId":"e"}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+            }
+        </grid>
+        <div id="div2" style="position: absolute; left: 32px; top: 72px; width: 680px; height: 8px; background-color: rgb(173, 216, 230);"></div>
+    </div>
+    <input id="input1" bindfieldid="input1" value="INPUT_COND" style="position: absolute; left: 48px; top: 48px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <button id="button1" onclick="button1Click(event);" style="position: absolute; left: 616px; top: 48px; width: 112px; height: 24px;">SEARCH</button>
+    <edit id="edit1" bindFieldId="edit1" style="position: absolute; left: 176px; top: 48px; width: 160px; height: 24px;"></edit>
+    <input bindfieldid="input1" id="input10" value="GRID" style="position: absolute; left: 48px; top: 128px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+</body>
+</html>

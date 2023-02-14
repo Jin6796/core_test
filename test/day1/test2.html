@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <!-- Add a script below this line. -->
+</head>
+<body>
+    <datafields>
+        <datafield fieldid="thumbnail" fieldname="thumbnail" type="String" size="256"></datafield>
+        <datafield fieldid="title" fieldname="title" type="String" size="256"></datafield>
+        <datafield fieldid="contents" fieldname="contents" type="String" size="256"></datafield>
+        <datafield fieldid="authors" fieldname="authors" type="String" size="256"></datafield>
+        <datafield fieldid="publisher" fieldname="publisher" type="String" size="256"></datafield>
+        <datafield fieldid="price" fieldname="price" type="String" size="256"></datafield>
+        <datafield fieldid="edit2" fieldname="edit2" type="String" size="256"></datafield>
+    </datafields>
+    <codecombo id="codecombo1" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" value="title" style="position: absolute; left: 40px; top: 48px; width: 200px; height: 32px;">
+        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":118}],
+        "data":[{"CODE":"title","CODE_NM":"책 제목"},{"CODE":"publisher","CODE_NM":"출판사"},{"CODE":"authors\t","CODE_NM":"저자"}]
+    </codecombo>
+    <edit id="edit2" style="position: absolute; left: 256px; top: 48px; width: 216px; height: 32px;"></edit>
+    <button id="button1" onclick="button1Click(event);" style="position: absolute; left: 728px; top: 40px; width: 160px; height: 40px; background-color: rgb(255, 192, 203); border-width: 1px; border-style: solid; border-color: rgb(158, 77, 104);">SEARCH</button>
+    <div id="div1" style="position: absolute; left: 40px; top: 96px; width: 856px; height: 8px; background-color: rgb(255, 192, 203);"></div>
+    <grid id="grid1" style="position: absolute; left: 40px; top: 136px; width: 872px; height: 672px; font-family: Gungsuh;">
+        "options" : {
+          "editable":false
+          ,"columnHeight":20
+          ,"cellHeight":160
+          ,"fixColumn":0
+          ,"conditionalstyle":""
+          ,"group":""
+          ,"aggregate":""
+          ,"appendmode":false
+          ,"autohiddencols":false
+          ,"autofit":false
+          ,"contextmenu":true
+          ,"indicator":{"show":false,"width":30}
+          ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+          ,"columns" : [
+            {"text":"썸네일"
+              ,"alignment":"center"
+              ,"width":100
+              ,"type":"column"
+              ,"height":20
+              ,"editable":"false"
+              ,"visible":"true"
+              ,"sortable":"true"
+              ,"sortType":"string"
+              ,"style":""
+              ,"filter":""
+              ,"field":"thumbnail"
+              ,"bindFieldId":"thumbnail"
+              ,"editor":{"type":"image","colimgsize":"original","alignment":"left","width":100,"height":200}
+            }
+            ,{"text":"제목","alignment":"center","width":200,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"title","bindFieldId":"title"}
+            ,{"text":"소개","alignment":"center","width":250,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"contents","bindFieldId":"contents"}
+            ,{"text":"저자","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"authors","bindFieldId":"authors"}
+            ,{"text":"출판사","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"publisher","bindFieldId":"publisher"}
+            ,{"text":"판매가","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"currency","alignment":"right"},"style":"","filter":"","field":"price","bindFieldId":"price"}
+          ]
+          ,"style":{}
+          ,"effect":{"columnHighlight":true}
+          ,"size":{"vertScrollWidth":19}
+          ,"footer":{"show":true,"height":24}
+        },
+        "data":[]
+    </grid>
+</body>
+</html>

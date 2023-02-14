@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" style="width:1280px;height:1024px">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/Y[wai]/wai.js"></script>
+    <link href="/css/default.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <chart id="chart1" style="position: absolute; left: 184px; top: 88px; width: 352px; height: 296px;">
+        "data":{"labels":[],"datasets":[{"label":"","backgroundColor":"","borderColor":"","borderWidth":0,"hoverBackgroundColor":"","hoverBorderColor":"","hoverBorderWidth":0,"data":[]}]},
+        "option" : {
+          "title":{"display":false,"position":"top"}
+          ,"legend":{"display":true,"reverse":false,"position":"top","labels":{"usePointStyle":false}}
+          ,"scales":{"xAxes":[{"display":true,"gridLines":{"display":true,"offsetGridLines":true},"ticks":{"display":true},"scaleLabel":{"display":false}}],"yAxes":[{"display":true,"gridLines":{"display":true},"ticks":{"beginAtZero":false,"display":true,"max":100},"scaleLabel":{"display":false}}]}
+          ,"tooltips":{"enabled":true,"mode":"nearest","intersect":true,"displayColors":true}
+          ,"animation":{"animateScale":false}
+        }
+    </chart>
+</body>
+</html>

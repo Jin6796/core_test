@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <!-- Add a script below this line. -->
+</head>
+<body>
+    <div id="div1" style="position: absolute; left: 16px; top: 16px; width: 882px; height: 586px; border-width: 3px; border-style: solid; border-color: rgb(173, 216, 230);">
+        <div id="div2" style="position: absolute; left: 24px; top: 72px; width: 816px; height: 8px; background-color: rgb(173, 216, 230);"></div>
+        <grid id="grid1" oncelldblclick="grid1Celldblclick(event);" style="position: absolute; left: 32px; top: 152px; width: 824px; height: 368px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"conditionalstyle":""
+              ,"group":""
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":false
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"columns" : [
+                {"text":"POST_ID","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"post_id","bindFieldId":"post_id","width_org":100}
+                ,{"text":"SUBJECT","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"subject","bindFieldId":"subject","width_org":100}
+                ,{"text":"CONTENT","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"content","bindFieldId":"content","width_org":100}
+                ,{"text":"VIEWS","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"views","bindFieldId":"views","width_org":100}
+                ,{"text":"REQ_USER","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"req_user","bindFieldId":"req_user","width_org":100}
+                ,{"text":"REG_DATE","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"reg_date","bindFieldId":"reg_date","width_org":100}
+                ,{"text":"UPD_USER","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"upd_user","bindFieldId":"upd_user","width_org":100}
+                ,{"text":"UPD_DATE","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"upd_date","bindFieldId":"upd_date","width_org":100}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+            }
+        </grid>
+        <button id="button2" style="position: absolute; left: 752px; top: 536px; width: 104px; height: 24px;">글쓰기</button>
+    </div>
+    <input id="input1" bindfieldid="input1" value="글 제목" style="position: absolute; left: 48px; top: 48px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <button id="button1" onclick="button1Click(event);" style="position: absolute; left: 744px; top: 48px; width: 112px; height: 24px;">SEARCH</button>
+    <edit id="edit1" bindFieldId="edit1" style="position: absolute; left: 176px; top: 48px; width: 160px; height: 24px;"></edit>
+    <input bindfieldid="input1" id="input10" value="GRID" style="position: absolute; left: 48px; top: 128px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+</body>
+</html>

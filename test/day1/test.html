@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <!-- Add a script below this line. -->
+</head>
+<body>
+    <serviceinfos>
+        <serviceinfo serviceid="test" url="https://uitool.org:8443/serviceCallTest" inputdata="inData1=TEST_input1" outputdata="outData1=TEST_output1;outData2=TEST_output2" queryparams="" options="type=POST;async=false;timeout=5000;dataType=JSON;charset=UTF-8;headers={}" callback="" beforecall="" aftercall=""></serviceinfo>
+    </serviceinfos>
+    <datagroups>
+        <datagroup groupid="TEST_input1" datafield="TEST_input_cond"></datagroup>
+        <datagroup groupid="TEST_output1" datafield="TEST_edit2;TEST_input1;TEST_codecombo2;TEST_dateedit1;TEST_calendar;TEST_input2;TEST_input3;TEST_textarea1"></datagroup>
+        <datagroup groupid="TEST_output2" datafield="field1;field2;field3;field4;field5"></datagroup>
+    </datagroups>
+    <datafields>
+        <datafield fieldid="TEST_input_cond" fieldname="input_cond" type="String" size="256"></datafield>
+        <datafield fieldid="TEST_edit2" fieldname="field1" type="String" size="256"></datafield>
+        <datafield fieldid="TEST_input1" fieldname="field2" type="String" size="256"></datafield>
+        <datafield fieldid="TEST_codecombo2" fieldname="field3" type="String" size="256"></datafield>
+        <datafield fieldid="TEST_dateedit1" fieldname="field4" type="String" size="256"></datafield>
+        <datafield fieldid="TEST_calendar" fieldname="field5" type="String" size="256"></datafield>
+        <datafield fieldid="TEST_input2" fieldname="field6" type="String" size="20"></datafield>
+        <datafield fieldid="TEST_input3" fieldname="field7" type="String" size="20"></datafield>
+        <datafield fieldid="TEST_textarea1" fieldname="field8" type="String" size="256"></datafield>
+        <datafield fieldid="field1" fieldname="field1" type="String" size="256"></datafield>
+        <datafield fieldid="field2" fieldname="field2" type="String" size="256"></datafield>
+        <datafield fieldid="field3" fieldname="field3" type="String" size="256"></datafield>
+        <datafield fieldid="field4" fieldname="field4" type="String" size="256"></datafield>
+        <datafield fieldid="field5" fieldname="field5" type="String" size="256"></datafield>
+    </datafields>
+    <div id="div1" style="position: absolute; left: 16px; top: 16px; width: 740px; height: 548px; border-width: 3px; border-style: solid; border-color: rgb(173, 216, 230);">
+        <codecombo id="codecombo2" bindFieldId="TEST_codecombo2" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" style="position: absolute; left: 160px; top: 176px; width: 160px; height: 24px;">
+            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":118}],
+            "data":[{"CODE":"01","CODE_NM":"TEST1"},{"CODE":"02","CODE_NM":"TEST2"},{"CODE":"03","CODE_NM":"TEST3"},{"CODE":""}]
+        </codecombo>
+        <grid id="grid3" style="position: absolute; left: 352px; top: 144px; width: 352px; height: 200px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"conditionalstyle":""
+              ,"group":""
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":false
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"columns" : [
+                {"text":"field1","alignment":"center","width":70,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"field1","bindFieldId":"field1","width_org":70}
+                ,{"text":"field2","alignment":"center","width":70,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"field2","bindFieldId":"field2","width_org":70}
+                ,{"text":"field3","alignment":"center","width":70,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"field3","bindFieldId":"field3","width_org":70}
+                ,{"text":"field4","alignment":"center","width":70,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"field4","bindFieldId":"field4","width_org":70}
+                ,{"text":"field5","alignment":"center","width":70,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"field5","bindFieldId":"field5","width_org":70}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+            }
+        </grid>
+        <textarea id="textarea1" bindfieldid="TEST_textarea1" style="position: absolute; left: 160px; top: 456px; width: 160px; height: 64px;"></textarea>
+        <input id="input11" type="checkbox" bindfieldid="TEST_input2" style="position: absolute; left: 160px; top: 392px; width: 24px; height: 24px;">
+        <input id="input12" type="radio" bindfieldid="TEST_input3" name="radio" class="radio" value="on" style="position: absolute; left: 160px; top: 424px; width: 24px; height: 24px;">
+        <input type="radio" id="input13" value="off" name="radio" class="radio" style="position: absolute; left: 192px; top: 424px; width: 24px; height: 24px;">
+        <div id="div2" style="position: absolute; left: 32px; top: 72px; width: 680px; height: 8px; background-color: rgb(173, 216, 230);"></div>
+    </div>
+    <input id="input1" bindfieldid="input1" value="INPUT_COND" style="position: absolute; left: 48px; top: 48px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <button id="button1" onclick="button1Click(event);" style="position: absolute; left: 616px; top: 48px; width: 112px; height: 24px;">SEARCH</button>
+    <input id="input2" value="EDIT" style="position: absolute; left: 48px; top: 128px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <input id="input3" value="INPUT" style="position: absolute; left: 48px; top: 160px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <dateedit id="dateedit1" bindFieldId="TEST_dateedit1" style="position: absolute; left: 176px; top: 224px; width: 160px; height: 24px;"></dateedit>
+    <edit id="edit1" bindFieldId="TEST_input_cond" style="position: absolute; left: 176px; top: 48px; width: 160px; height: 24px;"></edit>
+    <edit id="edit2" bindFieldId="TEST_edit2" style="position: absolute; left: 176px; top: 128px; width: 160px; height: 24px;"></edit>
+    <edit id="edit3" bindFieldId="TEST_input1" style="position: absolute; left: 176px; top: 160px; width: 160px; height: 24px;"></edit>
+    <input id="input4" value="CODECOMBO" style="position: absolute; left: 48px; top: 192px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <input id="input5" value="DATEEDIT" style="position: absolute; left: 48px; top: 224px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <input id="input6" value="CALENDAR" style="position: absolute; left: 48px; top: 256px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <calendar id="calendar1" bindFieldId="TEST_calendar" value="20230209" style="position: absolute; left: 176px; top: 256px; width: 160px; height: 144px;"></calendar>
+    <input id="input7" value="CHECKBOX" style="position: absolute; left: 48px; top: 408px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <input id="input8" value="RADIO" style="position: absolute; left: 48px; top: 440px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <input id="input9" value="TEXTAREA" style="position: absolute; left: 48px; top: 472px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+    <input bindfieldid="input1" id="input10" value="GRID" style="position: absolute; left: 368px; top: 128px; width: 112px; height: 24px; background-color: rgb(213, 235, 242); font-weight: bold;">
+</body>
+</html>
