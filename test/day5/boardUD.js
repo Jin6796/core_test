@@ -14,7 +14,6 @@ $.ajax({
         input10.value = data.data.views;
         textarea1.value = data.data.content;
         console.log(data.data);
-        console.log("통신 성공");
     }
 })
 
@@ -26,6 +25,7 @@ function button3Click(event) {
     const content = $('#textarea1').val();
 
     const form = {
+        post_id : post_id,
         subject : subject,
         upd_user : upd_user,
         content : content
@@ -66,10 +66,6 @@ function button3Click(event) {
             });
         }
 
-    // history.back();
-    // setTimeout(function(){
-    //     location.reload();
-    //     },3000);
 }
 
 // 게시글로 돌아가기
@@ -80,8 +76,8 @@ function button1Click(event) {
 // 게시판 작성 콜백 함수
 function insertBoardCallback(obj){
     if(obj != null){    
-        console.log(obj);    
-        console.log(obj.data);    
+        // console.log(obj);    
+        // console.log(obj.data);    
         console.log(obj.data.tran);
         const result = obj.data.tran;
         

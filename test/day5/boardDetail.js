@@ -38,23 +38,23 @@ function button3Click(event) {
 // 삭제하기
 function button2Click(event) {
 	const yn = confirm("게시글을 삭제하시겠습니까?");     
-        if(yn){
-            alert("지금은 삭제 안되지롱 우하하");
-        }   
         // if(yn){
-        //     $.ajax({    
-        //        url      : "http://localhost:8080/selectBoardTestDelete.do",
-        //     //    data     : JSON.stringify(form),
-        //        contentType: "application/json; charset=UTF-8",
-        //        dataType : "JSON",
-        //        cache    : false,
-        //        async    : true,
-        //        type     : "POST",    
-        //        success  : function(obj) {
-        //             insertBoardCallback(obj);                
-        //         },           
-        //        error    : function(xhr, status, error) {}
+        //     alert("지금은 삭제 안되지롱 우하하");
+        // }   
+        if(yn){
+            $.ajax({    
+               url      : "http://localhost:8080/selectBoardTestDelete.do",
+            //    data     : JSON.stringify(form),
+               contentType: "application/json; charset=UTF-8",
+               dataType : "JSON",
+               cache    : false,
+               async    : true,
+               type     : "POST",    
+               success  : function(obj) {
+                    insertBoardCallback(obj);                
+                },           
+               error    : function(xhr, status, error) {}
                 
-        //     });
-        // }
+            });
+        }
 }
