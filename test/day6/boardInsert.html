@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <!-- Add a script below this line. -->
+</head>
+<body>
+    <input id="input1" value="게시글 작성하기" style="position: absolute; left: 64px; top: 40px; width: 152px; height: 40px; text-align: left; font-size: 14px; border-style: none; font-weight: bold;">
+    <div id="div1" style="position: absolute; left: 64px; top: 96px; width: 768px; height: 8px; border-width: 2px; background-color: rgb(176, 196, 222);"></div>
+    <edit id="edit1" bindFieldId="subject" placeholder=" 제목을 입력해주세요" style="position: absolute; left: 136px; top: 128px; width: 696px; height: 32px;"></edit>
+    <textarea id="textarea1" placeholder="내용을 입력해주세요" bindfieldid="content" style="position: absolute; left: 136px; top: 208px; width: 696px; height: 344px;"></textarea>
+    <button id="button1" onclick="boardInsert(event);" style="position: absolute; left: 640px; top: 168px; width: 88px; height: 32px;">등록하기</button>
+    <button id="button2" onclick="button2Click(event);" style="position: absolute; left: 744px; top: 168px; width: 88px; height: 32px;">뒤로가기</button>
+    <edit id="edit2" bindFieldId="reg_user" placeholder=" 이름을 입력해주세요" style="position: absolute; left: 136px; top: 168px; width: 488px; height: 32px;"></edit>
+    <input id="input2" value="제목" style="position: absolute; left: 64px; top: 128px; width: 64px; height: 32px; text-align: center; font-size: 14px; font-weight: bold; border-style: none;">
+    <input id="input3" value="작성자" style="position: absolute; left: 64px; top: 168px; width: 64px; height: 32px; text-align: center; font-size: 14px; font-weight: bold; border-style: none;">
+    <input value="내용" id="input4" style="position: absolute; left: 64px; top: 208px; width: 64px; height: 344px; text-align: center; font-size: 14px; font-weight: bold; border-style: none;">
+    <input id="input5" value="첨부파일" style="position: absolute; left: 64px; top: 560px; width: 64px; height: 32px; font-weight: bold; font-size: 13px; text-align: center; border-style: none;">
+    <input id="input6" value="선택된 파일 없음" disabled style="position: absolute; left: 208px; top: 560px; width: 184px; height: 32px; text-align: center;">
+    <imgButton id="imgButton1" onclick="fileUpload(event);" style="position: absolute; left: 136px; top: 560px; width: 72px; height: 32px; font-size: 12px;"></imgButton>
+</body>
+</html>

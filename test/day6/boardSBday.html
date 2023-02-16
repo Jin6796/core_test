@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <!-- Add a script below this line. -->
+</head>
+<body>
+    <div id="div1" style="position: absolute; left: 24px; top: 16px; width: 826px; height: 562px; border-width: 3px; border-style: solid; border-color: rgb(173, 216, 230);">
+        <div id="div2" style="position: absolute; left: 24px; top: 72px; width: 776px; height: 8px; background-color: rgb(173, 216, 230);"></div>
+        <grid id="grid1" style="position: absolute; left: 112px; top: 144px; width: 272px; height: 376px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"conditionalstyle":""
+              ,"group":""
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":false
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"columns" : [
+                {"text":"POST_ID","alignment":"center","width":122,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"POST_ID","bindFieldId":"POST_ID"}
+                ,{"text":"SUBJECT","alignment":"center","width":119,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","field":"SUBJECT","bindFieldId":"SUBJECT"}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+            }
+        </grid>
+        <grid id="grid2" style="position: absolute; left: 440px; top: 144px; width: 272px; height: 376px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"conditionalstyle":""
+              ,"group":""
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":false
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"columns" : [
+                {"text":"작성자","alignment":"center","width":122,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","bindFieldId":"REG_USER","field":"REG_USER"}
+                ,{"text":"작성된 게시글 수","alignment":"center","width":119,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left"},"style":"","filter":"","bindFieldId":"CNT","field":"CNT"}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+            }
+        </grid>
+        <span id="span1" style="position: absolute; left: 144px; top: 112px; width: 128px; height: 32px; text-align: center; font-size: 14px; border-color: rgb(173, 216, 230); background-color: rgb(255, 255, 255); border-width: 2px; border-style: none; font-weight: bold;">
+          전체 게시글 수:
+        </span>
+        <input id="input1" type="text" value="" name="inputValue" style="position: absolute; left: 264px; top: 104px; width: 72px; height: 32px; border-width: 2px; border-color: rgb(222, 118, 217); border-style: none; text-align: right; font-size: 14px; font-weight: bold;">
+        <input id="input2" value="작성자별 게시글 수" style="position: absolute; left: 440px; top: 104px; width: 272px; height: 32px; text-align: center; font-weight: bold; font-size: 14px; border-color: rgb(173, 216, 230); background-color: rgb(255, 255, 255); border-width: 2px; border-style: none;">
+        <input id="input3" value="일별 통계" style="position: absolute; left: 32px; top: 24px; width: 96px; height: 32px; border-style: none; font-size: 16px; font-weight: bold;">
+    </div>
+    <button onclick="button1Click(event);" id="button1" style="position: absolute; left: 664px; top: 48px; width: 144px; height: 24px;">돌아가기</button>
+    <dateedit id="dateedit3" onSelect="selectDate(event);" style="position: absolute; left: 176px; top: 48px; width: 152px; height: 24px;"></dateedit>
+</body>
+</html>
