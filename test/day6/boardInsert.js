@@ -56,7 +56,7 @@ function insertBoardCallback(obj){
         
         if(result == true){                
             alert("게시글 등록을 성공하였습니다.");                
-            // location.href="./boardList.html"                
+            location.href="./boardList.html"                
         } else {                
             alert("게시글 등록을 실패하였습니다.");    
             return;
