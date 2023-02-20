@@ -7,7 +7,7 @@
 ![image](https://user-images.githubusercontent.com/103974960/220026560-ef2247a0-41bd-4e4b-b1a6-d8c47116b4d8.png)
 <br/> 
 
-<summary>게시판 및 통계 구현 화면</summary>
+# 게시판 및 통계 구현 화면
 - 검색
 ![image](https://user-images.githubusercontent.com/103974960/220027126-b1aaddfb-32a0-463d-8d88-40ba2ace2e95.png)<br/>
 - 상세조회
