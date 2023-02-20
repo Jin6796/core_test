@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="#">
+    <title>waiDev</title>
+    <link href="/waiDev/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/css/ruang-admin.css" rel="stylesheet">
+
+    <script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    
+    <script>
+        function searchUserGrp(grpId) {
+            var data = {user_grp_id: "", user_grp_name: ""};
+            svcCall("userGrpListInquiry", data, callback);
+            function callback(rs) {
+                grpGrid.SetData(rs);
+                if (grpId) {
+                    for (var i in rs) {
+                        if (grpId == rs[i].USER_GRP_ID) { grpGrid.SelectRow(i); break; }
+                    }
+                    if (!grpGrid.getSelection()) { grpGrid.SelectRow(grpGrid.GetData().length-1); }
+                    
+                    userGrpGridRowClick();
+                }
+            }
+        }
+
+        function userGrpGridRowClick(e) {
+            // clearInput();
+            var uData = grpGrid.getSelection();
+            document.getElementById("grp_id").value = uData.USER_GRP_ID;
+            document.getElementById("grp_name").value = uData.GRP_NAME;
+            document.getElementById("grp_desc").value = uData.GRP_DESC;
+            var data = {user_grp_id: uData.USER_GRP_ID};
+            svcCall("selectUserGrpRelList", data, callback);
+            function callback(rs){
+            	userGrid.SetData(rs);
+            }
+        }
+
+        function clearInput() {
+            document.getElementById("grp_id").value = "";
+            document.getElementById("grp_name").value = "";
+            document.getElementById("grp_desc").value = "";
+            userGrid.clear();
+        }
+        
+        function svcCall_save(dv){
+        	switch(dv) {
+	        	case "G": // Group
+	        		var fn = !document.getElementById("grp_id").value ? "Regist" : "Update";
+	        		var data = {
+        				user_grp_id: document.getElementById("grp_id").value,
+        				user_grp_name: document.getElementById("grp_name").value,
+        				grp_desc: document.getElementById("grp_desc").value,
+        				reg_user: getLoginUser(),
+        				upd_user: getLoginUser()
+	        		};
+	        		svcCall("userGrp"+fn, data, function(rs) {
+	            		if (rs) {
+	            			if (rs.tran == true) { // success
+	            				var gId = data.user_grp_id ? data.user_grp_id : true;
+	            				searchUserGrp(gId);
+		                        clearInput();
+		            		}
+	            		} else { // error
+	                        console.error("[ERROR] Service Transaction error.");
+	                    }
+	            	});
+	        		break;
+	        	case "M": // Member
+	        		var addMember = [];
+	        		var memList = JSON.parse(JSON.stringify(memberListGrid.GetData()));
+	        		for (var i=0; i<memList.length; i++) {
+	        			addMember.push(memList[i].USER_ID);
+	        		}
+	        		var data = {
+        				user_grp_id: document.getElementById("grp_id").value,
+        				user_member: addMember,
+        				reg_user: getLoginUser(),
+        				upd_user: getLoginUser()
+	        		};
+	        		svcCall("registUserGrpRel", data, function(rs) {
+	        			console.log("rs:",rs);
+	        			if (rs) {
+	        				if (rs.tran == true) { // success
+		            			userGrpGridRowClick();
+		            			closeModal();
+		            		}
+	        			} else { // error
+	                        console.error("[ERROR] Service Transaction error.");
+	                    }
+	            	});
+	        		break;
+        	}
+        }
+        
+        function svcCall_del(dv){
+        	var sndData = null;
+        	switch(dv) {
+	        	case "G": // Group
+	        		var grps = grpGrid.getCheckedRows();
+	                sndData = {"user_grp_id": []};
+	                for (var i in grps) {
+	                    sndData.user_grp_id.push(grps[i].USER_GRP_ID);
+	                }
+	                for (var i in grpGrid.gridObj.selectorArr.rows) {
+	                	grpGrid.SelectRow(grpGrid.gridObj.selectorArr.rows[i]);
+	                	grpGrid.DeleteRow(grpGrid.gridObj.selectorArr.rows[i]);
+	                    clearInput();
+	                }
+	                //console.log("sndData --> ", sndData);
+	                svcCall("userGrpDelete", sndData, callback);
+	                function callback(rs) {
+	                    //console.log("callback -->", rs);
+	                    if (rs == true) { // success
+	                    	searchUserGrp();
+	                        clearInput();
+	                    } else { // error
+	                        console.error("[ERROR] Service Transaction error.");
+	                    }
+	                };
+	        		break;
+	        	case "M": // Member
+	        		var users = userGrid.getCheckedRows();
+	                sndData = {"user_grp_id": document.getElementById("grp_id").value, "user_id": []};
+	                for (var i in users) {
+	                    sndData.user_id.push(users[i].USER_ID);
+	                }
+	                for (var i in userGrid.gridObj.selectorArr.rows) {
+	                	userGrid.SelectRow(userGrid.gridObj.selectorArr.rows[i]);
+	                	userGrid.DeleteRow(userGrid.gridObj.selectorArr.rows[i]);
+	                }
+	                //console.log("sndData --> ", sndData);
+	                svcCall("deleteUserGrpRel", sndData, callback);
+	                function callback(rs) {
+	                    //console.log("callback -->", rs);
+	                    if (rs == true) { // success
+	                    	//searchUserGrp();
+	                        //clearInput();
+	                    } else { // error
+	                        console.error("[ERROR] Service Transaction error.");
+	                    }
+	                };
+	        		break;
+    		}
+        }
+
+        function openModal(tit, txt, addC, rmvC) {
+        	if (!grpGrid.getSelection()) return;
+            $("#addListModal").modal({show: true});
+            loadGrpMembers();
+            loadAllUsers();
+        }
+        
+        function closeModal() {
+        	$("#addListModal").modal('hide');
+        }
+
+        var inqAllUsers = null;
+        function loadAllUsers(userId) {
+            var data = {user_id: "", user_name: ""};
+            svcCall("userListInquiry", data, callback);
+            function callback(rs) {
+            	inqAllUsers = JSON.parse(JSON.stringify(rs));
+            	loadUsers(userId);
+            };
+        }
+        
+        function loadUsers(userId) {
+        	var data = JSON.parse(JSON.stringify(inqAllUsers));
+        	var memList = memberListGrid.GetData();
+            for (var i=0; i<data.length; i++) {
+                for (var j=0; j<memList.length; j++) {
+                    if (data[i].USER_ID == memList[j].USER_ID) {
+                    	data.splice(i, 1);
+                    }
+                }
+            }
+            
+            allListGrid.SetData(data);
+            if (userId) {
+                for (var i in data) {
+                    if (userId == data[i].USER_ID) allListGrid.SelectRow(i);
+                }
+            }
+        }
+
+        function loadGrpMembers() {
+            memberListGrid.SetData(userGrid.GetData());
+        }
+
+        function moveItems(add) {
+        	var idx = 0;
+        	var gridChkIdx = -1;
+            var checkRows = null;
+            if (add) {
+                gridChkIdx = allListGrid.getCheckedRowsIndex();
+                checkRows = JSON.parse(JSON.stringify(allListGrid.getCheckedRows()));
+                
+                var memData = memberListGrid.GetData();
+                var apdData = memData.concat(allListGrid.getCheckedRows());
+                apdData.sort(function(a, b) {
+                    return a.USER_ID < b.USER_ID ? -1 : a.USER_ID > b.USER_ID ? 1 : 0;
+                });
+                memberListGrid.SetData(apdData);
+                for(var i=0; i<gridChkIdx.length; i++) {
+                    allListGrid.DeleteRow(gridChkIdx[i]);
+                }
+                
+                allListGrid.setUnCheckAll();
+                for (var ca=0; ca<checkRows.length; ca++) {
+                	for (cu=0; cu<memberListGrid.GetData().length; cu++) {
+                		if (checkRows[ca].USER_ID == memberListGrid.GetData()[cu].USER_ID) {
+                			//memberListGrid.setCheckRows(cu, true);
+                			//memberListGrid.SelectRow(cu);
+                			idx = cu;
+                			break;
+                		}
+                	}
+                }
+                memberListGrid.SelectRow(idx);
+            }
+            else {
+                gridChkIdx = memberListGrid.getCheckedRowsIndex();
+                checkRows = JSON.parse(JSON.stringify(memberListGrid.getCheckedRows()));
+                
+                append(0);
+                function append(i) {
+                    if (i == gridChkIdx.length) {
+                        loadUsers();
+                        
+                        memberListGrid.setUnCheckAll();
+                        for (var ca=0; ca<checkRows.length; ca++) {
+                        	for (cu=0; cu<allListGrid.GetData().length; cu++) {
+                        		if (checkRows[ca].USER_ID == allListGrid.GetData()[cu].USER_ID) {
+                        			//allListGrid.setCheckRows(cu, true);
+                        			//allListGrid.SelectRow(cu);
+                        			idx = cu;
+                        			break;
+                        		}
+                        	}
+                        }
+                        allListGrid.SelectRow(idx);
+                        return;
+                    } else {
+                        memberListGrid.DeleteRow(gridChkIdx[i]);
+                        i++;
+                    }
+                    append(i);
+                }
+            }
+        }
+
+    </script>
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar : Navigation -->
+    <ul class="navbar-nav sidebar sidebar-light" id="navigation"></ul>
+
+    <!-- Main -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- TopBar -->
+            <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" >
+                <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto" id="topBar"></ul>
+            </nav>
+
+            <!-- Container Fluid-->
+            <div class="container-fluid" id="container-wrapper">
+                <div class="d-sm-flex align-items-center justify-content-between">
+                    <h1 class="h4 mb-0 text-gray-800">사용자 그룹 관리</h1>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm my-4 mb-4">
+                            <div class="card-body p-0">
+                                <div class="row">
+                                    <div class="col-lg-5 pl-4">
+                                        <div class="default-form mb-1">
+                                            <form action="javascript:void(0)" > <!--onsubmit="return svcCall_user('save')">-->
+                                            	<div class="form-group">
+                                                    <input type="hidden" name="" id="" value=""/>
+                                                </div>
+                                                <div class="d-flex flex-row align-items-center justify-content-between">
+                                                    <h5 class="m-0 font-weight-bold text-primary">Group List</h5>
+                                                </div>
+                                                <div class="py-3">
+                                                    <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+                                                        <grid id="grpGrid" style="width: 100%; height:350px;" onrecordclick="userGrpGridRowClick(event)">
+                                                            "options" : {
+                                                                "editable":false
+                                                                ,"columnHeight":41
+                                                                ,"cellHeight":29
+                                                                ,"fixColumn":0
+                                                                ,"conditionalstyle":""
+                                                                ,"group":""
+                                                                ,"aggregate":""
+                                                                ,"appendmode":false
+                                                                ,"autohiddencols":false
+                                                                ,"autofit":false
+                                                                ,"contextmenu":true
+                                                                ,"indicator":{"show":true,"width":40}
+                                                                ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+                                                                ,"columns" : [
+                                                                    {"text":"Group ID","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"false","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"USER_GRP_ID"}
+                                                                    ,{"text":"Group Name","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"GRP_NAME"}
+                                                                    ,{"text":"Description","alignment":"center","width":200,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"GRP_DESC"}
+                                                                    ,{"text":"Regist User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+                                                                    ,{"text":"Regist Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                                    ,{"text":"Update User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+                                                                    ,{"text":"Update Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                                ]
+                                                                ,"style" : {
+                                                                    "light" : {
+                                                                        "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+                                                                        ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+                                                                    }
+                                                                }
+                                                                ,"effect":{"columnHighlight":true}
+                                                                ,"size":{"vertScrollWidth":19}
+                                                                ,"footer":{"show":true,"height":24}
+                                                            },
+                                                            "data":[]
+                                                        </grid>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group d-none">
+                                                    <label class="text-sm font-weight-bold">Group ID</label>
+                                                    <input type="text" class="form-control" id="grp_id" disabled>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">Group Name</label>
+                                                    <span class="required">*</span>
+                                                    <input type="text" class="form-control" id="grp_name" required>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">Description</label>
+                                                    <input type="text" class="form-control" id="grp_desc">
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <button type="submit" class="btn btn-secondary" onclick="svcCall_del('G')">Delete</button>
+                                                        </div>
+                                                        <div class="text-right col-9">
+                                                            <button type="submit" class="btn btn-primary" onclick="svcCall_save('G')">Save</button>
+                                                            <button type="submit" class="btn btn-outline-primary" onclick="searchUserGrp();clearInput();">Clear</button>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-7 my-3 mb-1">
+                                        <div class="pt-3 pl-3 d-flex flex-row align-items-center justify-content-between">
+                                            <h5 class="m-0 font-weight-bold text-primary">Group Members  ( Users )</h5>
+                                        </div>
+                                        <div class="default-form">
+                                            <div class="mb-1">
+                                                <div class="card-body p-0 pr-2">
+                                                    <div class="row">
+                                                        <div class="col-12 pr-2">
+                                                            <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+                                                                <grid id="userGrid" style="width: 100%; height:495px;">
+                                                                    "options" : {
+                                                                    "editable":false
+                                                                    ,"columnHeight":41
+                                                                    ,"cellHeight":29
+                                                                    ,"fixColumn":0
+                                                                    ,"conditionalstyle":""
+                                                                    ,"group":""
+                                                                    ,"aggregate":""
+                                                                    ,"appendmode":false
+                                                                    ,"autohiddencols":false
+                                                                    ,"autofit":false
+                                                                    ,"contextmenu":true
+                                                                    ,"indicator":{"show":true,"width":30}
+                                                                    ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+                                                                    ,"columns" : [
+                                                                    {"text":"User ID","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"USER_ID"}
+                                                                    ,{"text":"User Name","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"USER_NAME"}
+                                                                    ,{"text":"Phone / Mobile","alignment":"center","width":100,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PHONE"}
+                                                                    ,{"text":"E-mail","alignment":"center","width":130,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"EMAIL"}
+                                                                    ,{"text":"Active","alignment":"center","width":60,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"ACTIVE_YN"}
+                                                                    ,{"text":"Last Login","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"LAST_LOGIN"}
+                                                                    ,{"text":"Regist User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"REG_USER"}
+                                                                    ,{"text":"Regist Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                                    ,{"text":"Update User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"UPD_USER"}
+                                                                    ,{"text":"Update Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                                    ]
+                                                                    ,"style" : {
+                                                                    "light" : {
+                                                                    "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+                                                                    ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+                                                                    }
+                                                                    }
+                                                                    ,"effect":{"columnHighlight":true}
+                                                                    ,"size":{"vertScrollWidth":19}
+                                                                    ,"footer":{"show":true,"height":24}
+                                                                    },
+                                                                    "data":[]
+                                                                </grid>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right col-12 my-3 pr-0">
+                                                        <button type="submit" class="btn btn-primary" onclick="openModal()">Add</button>
+                                                        <button type="submit" class="btn btn-secondary" onclick="svcCall_del('M')">Delete</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    	<!-- Modal Center -->
+	    <div id="commonModal" class="row mb-3"></div>
+	    <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModal_title" aria-hidden="true">
+	        <div class="modal-dialog modal-dialog-centered" role="document">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <h5 class="modal-title" id="infoModal_title"></h5>
+	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                        <span aria-hidden="true">&times;</span>
+	                    </button>
+	                </div>
+	                <div class="modal-body font-weight-bold" id="infoModal_txt"></div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	
+	    <div class="modal fade" id="addListModal" tabindex="-1" role="dialog" aria-labelledby="addListModal_title" aria-modal="true" style="">
+	        <div class="modal-dialog modal-dialog-scrollable" role="document" style="max-width: 80vw;">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <h5 class="modal-title" id="addListModal_title">Add Group Members</h5>
+	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                        <span aria-hidden="true">×</span>
+	                    </button>
+	                </div>
+	                <div class="modal-body">
+	                    <div class="row">
+	                        <div class="col-55">
+	                            <h5 class="font-weight-bold pl-4">All Users</h5>
+	                            <div class="row">
+	                                <div class="col-12 pl-4 pr-2">
+	                                    <div style="width:99.9%;height:100%;border:1px solid #d1d3e2;">
+	                                        <grid id="allListGrid" style="width: 100%; height:572px;">
+	                                            "options" : {
+	                                            "editable":false
+	                                            ,"columnHeight":41
+	                                            ,"cellHeight":29
+	                                            ,"fixColumn":0
+	                                            ,"conditionalstyle":""
+	                                            ,"group":""
+	                                            ,"aggregate":""
+	                                            ,"appendmode":false
+	                                            ,"autohiddencols":false
+	                                            ,"autofit":false
+	                                            ,"contextmenu":true
+	                                            ,"indicator":{"show":true,"width":30}
+	                                            ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+	                                            ,"columns" : [
+	                                            {"text":"User ID","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"USER_ID"}
+	                                            ,{"text":"User Name","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"USER_NAME"}
+	                                            ,{"text":"Phone / Mobile","alignment":"center","width":100,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PHONE"}
+	                                            ,{"text":"E-mail","alignment":"center","width":130,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"EMAIL"}
+	                                            ,{"text":"Active","alignment":"center","width":60,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"ACTIVE_YN"}
+	                                            ,{"text":"Last Login","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"LAST_LOGIN"}
+	                                            ,{"text":"Regist User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"REG_USER"}
+	                                            ,{"text":"Regist Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+	                                            ,{"text":"Update User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"UPD_USER"}
+	                                            ,{"text":"Update Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+	                                            ]
+	                                            ,"style" : {
+	                                            "light" : {
+	                                            "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+	                                            ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+	                                            }
+	                                            }
+	                                            ,"effect":{"columnHighlight":true}
+	                                            ,"size":{"vertScrollWidth":19}
+	                                            ,"footer":{"show":true,"height":24}
+	                                            },
+	                                            "data":[]
+	                                        </grid>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                        <div class="col-05 p-sm-0 text-center" style="line-height:3rem;">
+	                            <table class="h-100">
+	                                <tr>
+	                                    <td>
+	                                        <button type="button" class="btn btn-primary" onclick="moveItems(1)"><i class="fas fa-arrow-right"></i></button>
+	                                        <button type="button" class="btn btn-primary" onclick="moveItems(0)"><i class="fas fa-arrow-left"></i></button>
+	                                    </td>
+	                                </tr>
+	                            </table>
+	
+	                        </div>
+	                        <div class="col-55">
+	                            <h5 class="font-weight-bold">Group Members</h5>
+	                            <div class="row">
+	                                <div class="col-12 px-2">
+	                                    <div style="width:99.9%;height:100%;border:1px solid #d1d3e2;">
+	                                        <grid id="memberListGrid" style="width: 100%; height:572px;">
+	                                            "options" : {
+	                                            "editable":false
+	                                            ,"columnHeight":41
+	                                            ,"cellHeight":29
+	                                            ,"fixColumn":0
+	                                            ,"conditionalstyle":""
+	                                            ,"group":""
+	                                            ,"aggregate":""
+	                                            ,"appendmode":false
+	                                            ,"autohiddencols":false
+	                                            ,"autofit":false
+	                                            ,"contextmenu":true
+	                                            ,"indicator":{"show":true,"width":30}
+	                                            ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+	                                            ,"columns" : [
+	                                            {"text":"User ID","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"USER_ID"}
+	                                            ,{"text":"User Name","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"USER_NAME"}
+	                                            ,{"text":"Phone / Mobile","alignment":"center","width":100,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PHONE"}
+	                                            ,{"text":"E-mail","alignment":"center","width":130,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"EMAIL"}
+	                                            ,{"text":"Active","alignment":"center","width":60,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"ACTIVE_YN"}
+	                                            ,{"text":"Last Login","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"LAST_LOGIN"}
+	                                            ,{"text":"Regist User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"REG_USER"}
+	                                            ,{"text":"Regist Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+	                                            ,{"text":"Update User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"UPD_USER"}
+	                                            ,{"text":"Update Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+	                                            ]
+	                                            ,"style" : {
+	                                            "light" : {
+	                                            "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+	                                            ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+	                                            }
+	                                            }
+	                                            ,"effect":{"columnHighlight":true}
+	                                            ,"size":{"vertScrollWidth":19}
+	                                            ,"footer":{"show":true,"height":24}
+	                                            },
+	                                            "data":[]
+	                                        </grid>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-primary" onclick="svcCall_save('M')">Save</button>
+	                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <!-- Scroll to top -->
+	    <a class="scroll-to-top rounded" href="#page-top">
+	        <i class="fas fa-angle-up"></i>
+	    </a>
+    </div>
+</div>
+<!--<script src="vendor/jquery/jquery.min.js"></script>-->
+<script src="/waiDev/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/waiDev/vendor/jquery-easing/jquery.easing.min.js"></script>
+<!--<script src="js/ruang-admin.min.js"></script>-->
+<script src="/waiDev/js/ruang-admin.js"></script>
+<script>
+    $(document).ready(function () {
+    	onLoadCommon();
+        searchUserGrp();
+    });
+</script>
+</body>
+</html>

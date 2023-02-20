@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.logMngtMapper">
+
+	<!-- LOG_BASE -->
+	<insert id="registLogBase" parameterType="hashMap">
+		INSERT INTO LOG_BASE 
+			   (  LOG_ID
+				, LOG_TYPE
+				, LOG_CONT
+				, REG_DATE )
+		VALUES (  #{log_id}
+				, #{log_type}
+				, #{log_cont}
+				, NOW() )
+	</insert>
+
+	<delete id="deleteLogBase">
+		DELETE FROM LOG_BASE
+		 WHERE LOG_ID = #{log_id}
+	</delete>
+
+	<select id="selectLogBaseList" parameterType="hashMap" resultType="hashMap">
+		SELECT LOG_ID
+			 , LOG_TYPE
+			 , LOG_CONT
+			 , REG_DATE
+		  FROM LOG_BASE
+		 WHERE LOG_ID = #{log_id}
+		   AND IF(#{log_type} = '', LOG_TYPE LIKE '%%', LOG_TYPE LIKE CONCAT('%', #{log_type}, '%'))
+		   AND IF(#{log_cont} = '', LOG_CONT LIKE '%%', LOG_CONT LIKE CONCAT('%', #{log_cont}, '%'))
+	</select>
+	
+</mapper>

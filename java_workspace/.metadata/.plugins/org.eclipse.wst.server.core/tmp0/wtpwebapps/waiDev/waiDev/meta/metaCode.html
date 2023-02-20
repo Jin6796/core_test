@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="#">
+    <title>waiDev</title>
+    <link href="/waiDev/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/css/ruang-admin.css" rel="stylesheet">
+    <style>
+    select option[value=""][disabled] {
+		display: none;
+	}
+	</style>
+    <script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    
+    <script>
+	    var codeDtList = null;
+	    function searchCode(codeId) {
+	    	clearInput();
+	        var searchVal = document.getElementById("search_dv_code").value;
+	        var data = {code_id: "", code_name: searchVal};
+	        svcCall("selectMetaCodeList", data, callback);
+	        function callback(rs) {
+	        	console.log(rs);
+	        	codeDtList = groupBy(rs.codeDtList, "CODE_ID");
+// 	        	console.log("codeDtList:",codeDtList);
+	        	codeGrid.SetData(rs.codeIdList);
+	            if (codeId) {
+	                for (var i in rs) {
+	                    if (codeId == rs[i].CODE_ID) { codeGrid.SelectRow(i); break; }
+	                }
+	                if (!codeGrid.getSelection()) { codeGrid.SelectRow(codeGrid.GetData().length-1); }
+	                
+	                codeGridRowClick();
+	            }
+	        }
+	    }
+	    
+	    function codeGridRowClick() {
+	        var data = codeGrid.getSelection();
+	        document.getElementById("code_id").value = data.CODE_ID;
+	        document.getElementById("code_id_name").value = data.CODE_ID_NAME;
+	        codeDetailGrid.SetData(codeDtList[data.CODE_ID]);
+	    }
+	    
+	    function codeDetailGridRowClick() {
+	    	var data = codeDetailGrid.getSelection();
+// 	        document.getElementById("code").value = data.CODE;
+// 	        document.getElementById("code_name").value = data.CODE_NAME;
+	    }
+	    
+	    function svcCall_save() {
+       		var fn = document.getElementById("code_id").value ? "update" : "regist";
+       		var rows = codeDetailGrid.GetData();
+       		
+       		// TODO : Code Data Check
+       		// key여부
+       		// null
+       		if (rows.length < 1) { 
+       			alert("code data가 없습니다."); // TODO : Modal 연결하기
+       			return;
+       		}
+       		
+       		var codes = [];
+       		var codeNms = [];
+       		for(var i=0; i<rows.length; i++) {
+       			codes.push(rows[i].CODE);
+       			codeNms.push(rows[i].CODE_NAME);
+       		}
+       		
+			var sndData = {
+				code_id: document.getElementById("code_id").value,
+		        code_id_name: document.getElementById("code_id_name").value,
+		        code: codes,
+		        code_name: codeNms,
+		        reg_user: getLoginUser(),
+		        upd_user: getLoginUser()
+		    };
+// 			console.log("fn --> ", fn);
+// 			console.log("sndData --> ", sndData);
+               
+            svcCall(fn + "MetaCode", sndData, function (rs) {
+                console.log("callback -->", rs);
+                if (rs.tran == true) { // success
+                    var cId = sndData.code_id ? sndData.code_id : true;
+                    clearInput();
+                    searchCode(cId);
+                 } else { // error
+                    console.error("[ERROR] Service Transaction error.");
+                }
+            });
+        }
+	    
+	    function svcCall_del() {
+	    	var dCodes = codeGrid.getCheckedRows();
+    		if(dCodes.length < 1) return;
+            sndData = {"code_id": []};
+            for (var i in dCodes) {
+                sndData.code_id.push(dCodes[i].CODE_ID);
+            }
+            for (var i in codeGrid.gridObj.selectorArr.rows) {
+            	codeGrid.SelectRow(codeGrid.gridObj.selectorArr.rows[i]);
+            	codeGrid.DeleteRow(codeGrid.gridObj.selectorArr.rows[i]);
+                clearInput();
+            }
+//             console.log("sndData --> ", sndData);
+            svcCall("deleteMetaCode", sndData, function (rs) {
+                console.log("callback -->", rs);
+                if (rs == true) { // success
+                	searchCode();
+                    clearInput();
+                } else { // error
+                    console.error("[ERROR] Service Transaction error.");
+                }
+            });
+	    }
+	    
+	    function codeGridCtrl(dv) {
+//         	if (!codeGrid.getSelection()) return;
+//         	var code = document.getElementById("code").value;
+//         	var code_name = document.getElementById("code_name").value;
+//         	var data = [{"CODE": code, "CODE_NAME": code_name}];
+        	switch(dv) {
+        		case "A": // Add
+        			codeDetailGrid.AddRow();
+        		break;
+        		case "D": // Delete
+//         			var sel = codeDetailGrid.getCheckedRows();
+        			var sel = codeDetailGrid.getSelection();
+        			var getData = codeDetailGrid.GetData();
+        			console.log(sel);
+	        		if (sel.length < 1) return;
+	        		if (sel.CODE) {
+	        			for (var i=0; i<getData.length; i++) {
+		        			if (getData[i].CODE == sel.CODE) {
+		        				codeDetailGrid.DeleteRow(i);
+		        				break;
+		        			}
+		        		}	        			
+	        		}
+	        		else {
+	        			codeDetailGrid.DeleteRow(getData.length-1);
+	        		}
+        		break;
+        	}
+        }
+    	
+	    
+	    function clearInput() {
+    		document.getElementById("code_id").value = "";
+            document.getElementById("code_id_name").value = "";
+            codeDetailGrid.clear();
+        }
+    
+    </script>
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar : Navigation -->
+    <ul class="navbar-nav sidebar sidebar-light" id="navigation"></ul>
+
+    <!-- Main -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- TopBar -->
+            <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" >
+                <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto" id="topBar"></ul>
+            </nav>
+            
+            <!-- Container Fluid-->
+            <div class="container-fluid" id="container-wrapper">
+                <div class="d-sm-flex align-items-center justify-content-between">
+                    <h1 class="h4 mb-0 text-gray-800">표준코드</h1>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card shadow-sm my-4 mb-4">
+                            <div class="card-body p-2">
+                                <div class="row">
+                                	<div class="col-lg-7">
+	                                    <div class="my-3 mb-1">
+	                                    	<div class="row pr-3">
+	                                            <div class="col-6">
+	                                                <div class="pl-4 pt-1 d-flex flex-row align-items-center justify-content-between">
+	                                                    <h5 class="m-0 font-weight-bold text-primary">Code</h5>
+	                                                </div>
+	                                            </div>
+	                                            <div class="col-6">
+	                                            	<div class="input-group">
+			                                            <input type="text" class="form-control bg-light border-1 small" aria-label="Search" aria-describedby="basic-addon2" id="search_dv_code" placeholder="Code Name">
+			                                            <div class="input-group-append">
+			                                                <button class="btn btn-secondary" type="button" onclick="searchCode()">
+			                                                    <i class="fas fa-search fa-sm"></i>
+			                                                </button>
+			                                            </div>
+			                                        </div>
+	                                            </div>
+	                                        </div>
+	                                        <div class="col-lg-12 pt-3">
+		                                        <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+		                                            <grid id="codeGrid" style="width: 99.9%; height:500px;" onrecordclick="codeGridRowClick(event)">
+		                                                "options" : {
+		                                                "editable":false
+		                                                ,"columnHeight":41
+		                                                ,"cellHeight":29
+		                                                ,"fixColumn":0
+		                                                ,"conditionalstyle":""
+		                                                ,"group":""
+		                                                ,"aggregate":""
+		                                                ,"appendmode":false
+		                                                ,"autohiddencols":false
+		                                                ,"autofit":false
+		                                                ,"contextmenu":true
+		                                                ,"indicator":{"show":true,"width":30}
+		                                                ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+		                                                ,"columns" : [
+		                                                {"text":"Code ID","alignment":"center","width":150,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"CODE_ID"}
+		                                                ,{"text":"Code ID Name","alignment":"center","width":200,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"CODE_ID_NAME"}
+		                                                ,{"text":"Regist User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+		                                                ,{"text":"Regist Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+		                                                ,{"text":"Update User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+		                                                ,{"text":"Update Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+		                                                ]
+		                                                ,"style" : {
+		                                                "light" : {
+		                                                "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+		                                                ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+		                                                }
+		                                                }
+		                                                ,"effect":{"columnHighlight":true}
+		                                                ,"size":{"vertScrollWidth":19}
+		                                                ,"footer":{"show":true,"height":24}
+		                                                },
+		                                                "data":[]
+		                                            </grid>
+		                                        </div>
+		                                    </div>
+		                                    <div class="col-12 my-3 pr-0">
+                                                 <button type="submit" class="btn btn-secondary" onclick="svcCall_del('C')">Delete</button>
+                                             </div>
+	                                	</div>
+	                                </div>
+                                	<div class="col-lg-5">
+	                                    <div class="my-3 mb-1">
+	                                        <div class="default-form" style="padding-top:2rem !important;padding-bottom:0 !important">
+			                                    <form action="javascript:void(0)">
+			                                        <div class="form-group">
+			                                            <input type="hidden" name="" id="" value=""/>
+			                                        </div>
+			                                        <div class="form-group">
+				                                        <div class="row">
+				                                        	<div class="col-7">
+				                                        		<label class="text-sm font-weight-bold">Code ID</label>
+		                                       					<input type="text" class="form-control" id="code_id" disabled>
+				                                        	</div>
+				                                        </div>
+	                                      			</div>
+	                                      			<div class="form-group">
+	                                      				<div class="row">
+	                                      					<div class="col-7">
+				                                        		<label class="text-sm font-weight-bold">Code ID Name</label>
+			                                        			<span class="required">*</span>
+			                                        			<input type="text" class="form-control" id="code_id_name" required>
+				                                        	</div>
+	                                      				</div>
+	                                      			</div>
+	                                      		</form>
+	                                      		<div class="row pr-3 pt-2">
+	                                      				<div class="col-6">
+		                                                    <label class="text-sm font-weight-bold">Code Detail</label>
+		                                                    <span class="required">*</span>
+	                                      				</div>
+	                                      				<div class="col-6 pr-0">
+	                                      					<div class="text-right col-12 pr-0">
+				                                            	<button type="submit" class="btn btn-xs btn-primary" onclick="codeGridCtrl('A')" title="Add Row"><i class="fas fa-plus"></i></button>
+	                                                        	<button type="submit" class="btn btn-xs btn-secondary" onclick="codeGridCtrl('D')" title="Delete Row"><i class="fas fa-minus"></i></button>
+				                                            </div>
+	                                      				</div>
+			                                        </div>
+				                                    <div class="row">
+	                                      				<div class="col-12">
+					                                        <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+					                                        	<grid id="codeDetailGrid" style="width: 100%; height:320px;" onrecordclick="codeDetailGridRowClick(event)">
+					                                                "options" : {
+					                                                "editable":true
+					                                                ,"columnHeight":41
+					                                                ,"cellHeight":29
+					                                                ,"fixColumn":0
+					                                                ,"conditionalstyle":""
+					                                                ,"group":""
+					                                                ,"aggregate":""
+					                                                ,"appendmode":false
+					                                                ,"autohiddencols":false
+					                                                ,"autofit":true
+					                                                ,"contextmenu":true
+					                                                ,"indicator":{"show":true,"width":30}
+					                                                ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+					                                                ,"columns" : [
+					                                                {"text":"Code","alignment":"center","width":291,"type":"column","height":40,"editable":"true","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"CODE"}
+					                                                ,{"text":"Code Name","alignment":"center","width":300,"type":"column","height":40,"editable":"true","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"CODE_NAME"}
+					                                                ]
+					                                                ,"style" : {
+					                                                "light" : {
+					                                                "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+					                                                ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+					                                                }
+					                                                }
+					                                                ,"effect":{"columnHighlight":true}
+					                                                ,"size":{"vertScrollWidth":19}
+					                                                ,"footer":{"show":true,"height":24}
+					                                                },
+					                                                "data":[]
+					                                            </grid>
+					                                        </div>
+			                                        	</div>
+		                                        	</div>
+	                                      		<div class="text-right col-12 my-3 pr-0">
+	                                            	<button type="submit" class="btn btn-primary" onclick="svcCall_save('C')">Save</button>
+	                                                <input type="button" class="btn btn-outline-primary" onclick="clearInput()" value="Clear">
+	                                            </div>
+			                                </div>
+	                                	</div>
+	                                </div>
+	                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Center -->
+        <div id="commonModal" class="row mb-3"></div>
+        
+        <!-- Scroll to top -->
+	    <a class="scroll-to-top rounded" href="#page-top">
+	        <i class="fas fa-angle-up"></i>
+	    </a>
+    </div>
+</div>
+<!--<script src="vendor/jquery/jquery.min.js"></script>-->
+<script src="/waiDev/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/waiDev/vendor/jquery-easing/jquery.easing.min.js"></script>
+<!--<script src="js/ruang-admin.min.js"></script>-->
+<script src="/waiDev/js/ruang-admin.js"></script>
+<script>
+    $(document).ready( function() {
+    	onLoadCommon();
+    	searchCode();
+    });
+</script>
+</body>
+</html>

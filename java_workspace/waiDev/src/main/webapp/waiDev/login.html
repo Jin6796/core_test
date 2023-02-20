@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+<!--    <link href="img/logo/logo.png" rel="icon">-->
+	<link rel="shortcut icon" href="#">
+    <title>waiDev - Login</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/ruang-admin.css" rel="stylesheet">
+    <script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script>
+	    $(function () {
+	    	chkLoginInfo();
+	    });
+    
+	    function chkLoginInfo() {
+	    	if (toBoolean(localStorage.waiDev_chk)) {
+	            document.getElementById("remember_id").checked = true;
+	            if (localStorage.waiDev_id) { document.getElementById("input_id").value = localStorage.waiDev_id; }
+	            if (localStorage.waiDev_pw) { document.getElementById("input_pw").value = localStorage.waiDev_pw; }
+	        } else {
+	            document.getElementById("remember_id").checked = false;
+	        }
+	    }
+    
+    	function login(){
+    		var user_id = document.getElementById("input_id").value;
+    		var user_pw = document.getElementById("input_pw").value;
+    		var data = {user_id: user_id, password: user_pw};
+    		svcCall("userLogin", data, function (rs) {
+            	if (rs) {
+            		if (rs.tran == true) {
+            			var strID = (document.getElementById("input_id").value+'').trim();
+            	        var strPW = (document.getElementById("input_pw").value+'').trim();
+            			if (document.getElementById("remember_id").checked) {
+            				localStorage.setItem('waiDev_id', strID);
+            				localStorage.setItem('waiDev_pw', strPW);
+            	            localStorage.waiDev_chk = true;
+            	        } else {
+            	        	localStorage.setItem('waiDev_id', '');
+            				localStorage.setItem('waiDev_pw', '');
+            	            localStorage.waiDev_chk = false;
+            	        }
+            			
+            			// TODO : session 처리
+        	         	localStorage.setItem('login_id', strID);
+        	         	localStorage.setItem('admin_yn', rs.data.ADMIN_YN);
+        	         	
+        	            location.replace("/waiDev/index.html");
+            		}
+            	} else {
+            		openModal("Alert", "ID 또는 비밀번호를 잘못입력했습니다.", "text-danger", "text-primary");
+            	}
+            });
+    	}
+    	
+    	function openModal(tit, txt, addC, rmvC) {
+            $("#infoModal").modal({show: true});
+            document.getElementById("infoModal_title").innerText = tit;
+            document.getElementById("infoModal_txt").innerText = txt;
+            $("#infoModal_txt").removeClass(rmvC);
+            $("#infoModal_txt").addClass(addC);
+        }
+    	
+    	function toBoolean(TF) {
+            if ((TF+"").toUpperCase() == 'TRUE') {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    	
+    </script>
+</head>
+<body class="bg-gradient-login">
+<!-- Login Content -->
+<div class="container-login">
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-12 col-md-9">
+            <div class="card shadow-sm my-5">
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <img src="img/login_bg.jpg" class="w-100">
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="login-form">
+                                <div class="text-center">
+                                	
+                                	<!-- Project Name -->
+                                    <h1 class="font-weight-bold text-primary mb-2">Development System</h1>
+                                    <div class="text-sm mb-5">개발서버 시스템</div>
+                                
+                                </div>
+                                <form class="user">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="input_id" placeholder="Enter ID" autofocus>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control" id="input_pw" placeholder="Password" onkeydown="if (event.keyCode == 13) {login(event)}">
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox small" style="line-height: 1.5rem;">
+                                            <input type="checkbox" class="custom-control-input" id="remember_id">
+                                            <label class="custom-control-label" for="remember_id">Remember Me</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-block" onclick="login()">Login</a>
+                                    </div>
+                                </form>
+                                <div class="text-center">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Center -->
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModal_title"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModal_title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body font-weight-bold" id="infoModal_txt"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+        
+<!-- Login Content -->
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+<script src="js/ruang-admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.userGrpMngtMapper">
+	<insert id="registUserGrp" parameterType="hashMap">
+		INSERT INTO USER_GRP_BASE 
+			   ( USER_GRP_ID
+			   , GRP_NAME
+			   , GRP_DESC
+			   , REG_USER
+			   , REG_DATE
+			   , UPD_USER
+			   , UPD_DATE )
+		VALUES ((SELECT CONCAT('G', #{cur_date}, LPAD(COALESCE(CAST(SUBSTR(MAX(U.USER_GRP_ID), -3) AS INTEGER), 0) + 1, 3, '0')) USER_GRP_ID
+		   		   FROM USER_GRP_BASE U
+				  WHERE DATE_FORMAT(U.REG_DATE, '%Y%m%d') LIKE #{cur_date})
+			   , #{user_grp_name}
+			   , #{grp_desc}
+			   , #{reg_user}
+			   , NOW()
+			   , #{upd_user}
+			   , NOW() )
+	</insert>
+	
+	<update id="updateUserGrp">
+		UPDATE USER_GRP_BASE
+		   SET GRP_NAME		= #{user_grp_name}
+		   	 , GRP_DESC		= #{grp_desc}
+		     , UPD_USER 	= #{upd_user}
+		     , UPD_DATE  	= NOW()
+		 WHERE USER_GRP_ID  = #{user_grp_id}
+	</update>
+	
+	<delete id="deleteUserGrp">
+		DELETE FROM G, R
+			   USING USER_GRP_BASE AS G
+		   LEFT JOIN USER_GRP_REL AS R
+			      ON G.USER_GRP_ID = R.USER_GRP_ID
+		 	   WHERE G.USER_GRP_ID = #{user_grp_id}
+	</delete>
+	
+	<select id="selectUserGrpList" parameterType="hashMap" resultType="hashMap">
+		SELECT USER_GRP_ID,
+			   GRP_NAME,
+			   GRP_DESC,
+			   REG_USER,
+			   DATE_FORMAT(REG_DATE,'%Y-%m-%d %T') REG_DATE,
+			   UPD_USER,
+			   DATE_FORMAT(UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		  FROM USER_GRP_BASE
+		 WHERE IF(#{user_grp_id}   = '', USER_GRP_ID LIKE '%%', USER_GRP_ID LIKE CONCAT('%', #{user_grp_id}, '%'))
+		   AND IF(#{user_grp_name} = '', GRP_NAME LIKE '%%', GRP_NAME LIKE CONCAT('%', #{user_grp_name}, '%'))
+	  ORDER BY USER_GRP_ID
+	</select>
+	
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.metaCodeMngtMapper">
+
+	<!-- META_CODE -->
+	<insert id="registMetaCode" parameterType="hashMap">
+		INSERT INTO META_CODE
+			   (  CODE_ID
+				, CODE_ID_NAME
+				, CODE
+				, CODE_NAME
+				, REG_USER
+				, REG_DATE
+				, UPD_USER
+				, UPD_DATE )
+		VALUES (  #{code_id}
+				, #{code_id_name}
+				, #{code}
+				, #{code_name}
+				, #{reg_user}
+				, NOW()
+				, #{upd_user}
+				, NOW() )
+	</insert>
+	
+	<update id="updateMetaCode">
+		UPDATE META_CODE
+		   SET CODE_NAME = #{code_name}
+			 , UPD_USER	 = #{upd_user}
+			 , UPD_DATE	 = NOW()
+		 WHERE CODE_ID 	 = #{code_id}
+	</update>
+
+	<delete id="deleteMetaCode">
+		DELETE FROM META_CODE
+		 WHERE CODE_ID = #{code_id}
+	</delete>
+
+	<select id="selectMetaCodeId" parameterType="hashMap" resultType="hashMap">
+		SELECT LPAD(MAX(CODE_ID) + 1, 6,'0') CODE_ID FROM META_CODE
+	</select>
+	
+	<select id="selectMetaCodeList" parameterType="hashMap" resultType="hashMap">
+		SELECT CODE_ID
+			 , CODE_ID_NAME
+			 , REG_USER
+			 , DATE_FORMAT(REG_DATE,'%Y-%m-%d %T') REG_DATE
+			 , UPD_USER
+			 , DATE_FORMAT(UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		  FROM META_CODE
+		 WHERE IF(#{code_id} = '', CODE_ID LIKE '%%', CODE_ID LIKE CONCAT('%', #{code_id}, '%'))
+		   AND IF(#{code_name} = '', CODE_NAME LIKE '%%', CODE_NAME LIKE CONCAT('%', #{code_name}, '%'))
+	  GROUP BY CODE_ID
+ 	  ORDER BY CODE_ID
+	</select>
+	
+	<select id="selectMetaCodeDetailList" parameterType="hashMap" resultType="hashMap">
+		SELECT CODE_ID
+			 , CODE_ID_NAME
+			 , CODE
+			 , CODE_NAME
+			 , REG_USER
+			 , DATE_FORMAT(REG_DATE,'%Y-%m-%d %T') REG_DATE
+			 , UPD_USER
+			 , DATE_FORMAT(UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		  FROM META_CODE
+		 WHERE IF(#{code_id} = '', CODE_ID LIKE '%%', CODE_ID LIKE CONCAT('%', #{code_id}, '%'))
+		   AND IF(#{code_name} = '', CODE_NAME LIKE '%%', CODE_NAME LIKE CONCAT('%', #{code_name}, '%'))
+ 	  ORDER BY CODE_ID
+	</select>
+	
+</mapper>

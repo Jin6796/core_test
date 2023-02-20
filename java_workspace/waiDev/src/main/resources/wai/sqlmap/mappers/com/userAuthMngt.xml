@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.userAuthMngtMapper">
+
+	<!-- USER_AUTH -->
+	<insert id="registUserAuth" parameterType="hashMap">
+		INSERT INTO USER_AUTH 
+			   (  AUTH_ID
+				, AUTH_NAME
+				, AUTH_TYPE
+				, INQ_AUTH_YN
+				, REG_AUTH_YN
+				, UPD_AUTH_YN
+				, DEL_AUTH_YN
+				, AUTH_DESC
+				, REG_USER
+				, REG_DATE
+				, UPD_USER
+				, UPD_DATE )
+		VALUES ((SELECT CONCAT('A', #{cur_date}, LPAD(COALESCE(CAST(SUBSTR(MAX(A.AUTH_ID), -3) AS INTEGER), 0) + 1, 3, '0')) AUTH_ID
+				   FROM USER_AUTH A
+				  WHERE DATE_FORMAT(A.REG_DATE, '%Y%m%d') LIKE #{cur_date})
+				, #{auth_name}
+				, #{auth_type}
+				, #{inq_auth_yn}
+				, #{reg_auth_yn}
+				, #{upd_auth_yn}
+				, #{del_auth_yn}
+				, #{auth_desc}
+				, #{reg_user}
+				, NOW()
+				, #{upd_user}
+				, NOW() )
+	</insert>
+	
+	<update id="updateUserAuth">
+		UPDATE USER_AUTH
+		   SET AUTH_NAME   = #{auth_name}
+			 , AUTH_TYPE   = #{auth_type}
+			 , INQ_AUTH_YN = #{inq_auth_yn}
+			 , REG_AUTH_YN = #{reg_auth_yn}
+			 , UPD_AUTH_YN = #{upd_auth_yn}
+			 , DEL_AUTH_YN = #{del_auth_yn}
+		   	 , AUTH_DESC   = #{auth_desc}
+		   	 , UPD_USER	   = #{upd_user}
+			 , UPD_DATE	   = NOW()
+		 WHERE AUTH_ID     = #{auth_id}
+	</update>
+
+	<delete id="deleteUserAuth">
+		DELETE FROM A, G
+		 	  USING USER_AUTH AS A
+		  LEFT JOIN USER_GRP_AUTH AS G
+		    	 ON A.AUTH_ID = G.AUTH_ID
+		   	  WHERE A.AUTH_ID = #{auth_id}
+	</delete>
+
+	<select id="selectUserAuthList" parameterType="hashMap" resultType="hashMap">
+		SELECT AUTH_ID
+			 , AUTH_NAME
+			 , AUTH_TYPE
+			 , INQ_AUTH_YN
+			 , REG_AUTH_YN
+			 , UPD_AUTH_YN
+			 , DEL_AUTH_YN
+			 , AUTH_DESC
+			 , REG_USER
+			 , DATE_FORMAT(REG_DATE,'%Y-%m-%d %T') REG_DATE
+			 , UPD_USER
+			 , DATE_FORMAT(UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		  FROM USER_AUTH
+		 WHERE IF(#{auth_id} = '', AUTH_ID LIKE '%%', AUTH_ID LIKE CONCAT('%', #{auth_id}, '%'))
+		   AND IF(#{auth_name} = '', AUTH_NAME LIKE '%%', AUTH_NAME LIKE CONCAT('%', #{auth_name}, '%'))
+		   AND IF(#{auth_type} = '', AUTH_TYPE LIKE '%%', AUTH_TYPE LIKE CONCAT('%', #{auth_type}, '%'))
+	</select>
+	
+</mapper>

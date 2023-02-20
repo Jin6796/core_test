@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script>
+        $(function() {
+
+        });
+
+        function userBtnClick(fn) {
+        	var userData = {
+                user_id: document.getElementById("user_id").value,
+                password: document.getElementById("user_pw").value,
+                user_name: document.getElementById("user_name").value,
+                phone: document.getElementById("user_phone").value,
+                email: document.getElementById("user_email").value,
+                enabled: document.getElementById("user_enabled").value
+            };
+            console.log(fn, "---> ", userData);
+            svcCall("user"+fn, userData, callback);
+            function callback(rs) {
+            	console.log("callback -->", rs);
+            }
+        }
+        function grpBtnClick(fn) {
+        	var data = {
+                user_grp_id: document.getElementById("grp_id").value,
+                user_grp_name: document.getElementById("grp_name").value,
+                grp_desc: document.getElementById("grp_desc").value
+            };
+            console.log(fn, "---> ", data);
+            svcCall("userGrp"+fn, data, callback);
+            function callback(rs) {
+            	console.log("callback -->", rs);
+            }
+        }
+        
+        function inqBtnClick(dv){
+        	switch(dv) {
+        		case "U":
+        			var data = {user_id: document.getElementById("search_user_id").value, user_name: document.getElementById("search_user_name").value};
+                	svcCall("userListInquiry", data, callback);
+        			break;
+        		case "G":
+        			var data = {
+        				user_grp_id:"",
+        				user_grp_name: ""
+        			};
+                	svcCall("userGrpListInquiry", data, callback);
+        			break;
+        	}
+        	
+        	function callback(rs) {
+            	console.log("callback -->", rs);
+            }
+        }
+        
+        function loginBtnClick() {
+        	var data = {user_id: document.getElementById("login_id").value, password: document.getElementById("login_pw").value};
+        	svcCall("userLogin", data, callback);
+            function callback(rs) {
+            	console.log("callback -->", rs);
+            }
+        }
+        
+        
+        function BtnClear() {
+        	for(var i=0; i<$(".user_input").length; i++){
+        		$(".user_input")[i].value ='';
+        	}
+        }
+    </script>
+</head>
+<body>
+<b>User</b><br />
+<input type="text" id="search_user_id" placeholder="ID"><br />
+<input type="text" id="search_user_name" placeholder="Name">
+<button id="inqBtn" onblur="" onclick="inqBtnClick('U');" style="width: 80px;">Inquiry</button>
+<p>
+<input type="text" id="user_id" class="user_input" placeholder="ID" value="aaa">
+<button id="regBtn" onblur="" onclick="userBtnClick('Inquiry');" style="width: 80px;">ID Check</button><br />
+<input type="password" id="user_pw" class="user_input" placeholder="Password" value="core1234"><br />
+<input type="text" id="user_name" class="user_input" placeholder="Name" value="사용자"><br />
+<input type="text" id="user_phone" class="user_input" placeholder="Phone" value="010-111-1111"><br />
+<input type="text" id="user_email" class="user_input" placeholder="Email" value="aaa@test.co.kr"><br />
+<input type="text" id="user_enabled" class="user_input" placeholder="Enabled" value="Y">
+<button id="regBtn" onblur="" onclick="userBtnClick('Regist');" style="width: 80px;">Regist</button>
+<button id="updBtn" onblur="" onclick="userBtnClick('Update');" style="width: 80px;">Update</button>
+<button id="delBtn" onblur="" onclick="userBtnClick('Delete');" style="width: 80px;">Delete</button>
+<button id="clrBtn" onblur="" onclick="BtnClear();" style="width: 80px;">Clear</button>
+<p>
+<input type="text" id="login_id" placeholder="ID" value="aaa"><br />
+<input type="password" id="login_pw" placeholder="Password" value="core1234">
+<button id="inqBtn" onblur="" onclick="loginBtnClick();" style="width: 80px;">Login</button>
+<p>
+
+<b>Group</b><br />
+<button id="inqBtn" onblur="" onclick="inqBtnClick('G');" style="width: 80px;">Inquiry</button>
+<p>
+<input type="text" id="grp_id" class="user_input" placeholder="Group ID" value=G20220602005><br />
+<input type="text" id="grp_name" class="user_input" placeholder="Group Name" value="그룹1"><br />
+<input type="text" id="grp_desc" class="user_input" placeholder="Description" value="사용자 그룹 1"><br />
+<button id="regBtn" onblur="" onclick="grpBtnClick('Regist');" style="width: 80px;">Regist</button>
+<button id="updBtn" onblur="" onclick="grpBtnClick('Update');" style="width: 80px;">Update</button>
+<button id="delBtn" onblur="" onclick="grpBtnClick('Delete');" style="width: 80px;">Delete</button>
+<button id="clrBtn" onblur="" onclick="BtnClear('G');" style="width: 80px;">Clear</button>
+<p>
+</body>
+</html>

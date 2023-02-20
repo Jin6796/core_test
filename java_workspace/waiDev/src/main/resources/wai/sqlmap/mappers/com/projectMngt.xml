@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.projectMngtMapper">
+
+	<!-- PROJECT_BASE -->
+	<insert id="registProjectBase" parameterType="hashMap">
+		INSERT INTO PROJECT_BASE 
+			   (  PROJECT_ID
+				, PROJECT_NAME
+				, PROJECT_DESC
+				, USE_YN
+				, REG_USER
+				, REG_DATE
+				, UPD_USER
+				, UPD_DATE )
+		VALUES (( SELECT CONCAT('P', #{cur_date}, LPAD(COALESCE(CAST(SUBSTR(MAX(P.PROJECT_ID), -3) AS INTEGER), 0) + 1, 3, '0')) PROJECT_ID
+	   		   	    FROM PROJECT_BASE P
+			       WHERE DATE_FORMAT(P.REG_DATE, '%Y%m%d') LIKE #{cur_date})
+				, #{project_name}
+				, #{project_desc}
+				, #{use_yn}
+				, #{reg_user}
+				, NOW()
+				, #{upd_user}
+				, NOW() )
+	</insert>
+	
+	<update id="updateProjectBase">
+		UPDATE PROJECT_BASE
+		   SET PROJECT_NAME = #{project_name}
+			 , PROJECT_DESC	= #{project_desc}
+			 , USE_YN		= #{use_yn}
+			 , UPD_USER		= #{upd_user}
+			 , UPD_DATE		= NOW()
+		 WHERE PROJECT_ID   = #{project_id}
+	</update>
+
+	<delete id="deleteProjectBase">
+		DELETE FROM P, G
+		   	  USING PROJECT_BASE AS P
+	      LEFT JOIN PROJECT_GRP AS G
+		   	     ON P.PROJECT_ID = G.PROJECT_ID
+	 	   	  WHERE P.PROJECT_ID = #{project_id}
+	</delete>
+
+	<select id="selectProjectBaseList" parameterType="hashMap" resultType="hashMap">
+			SELECT PROJECT_ID
+				 , PROJECT_NAME
+				 , PROJECT_DESC
+				 , USE_YN
+				 , REG_USER
+				 , DATE_FORMAT(REG_DATE,'%Y-%m-%d %T') REG_DATE
+				 , UPD_USER
+				 , DATE_FORMAT(UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+			  FROM PROJECT_BASE
+			 WHERE IF(#{project_id} = '', PROJECT_ID LIKE '%%', PROJECT_ID LIKE CONCAT('%', #{project_id}, '%'))
+			   AND IF(#{project_name} = '', PROJECT_NAME LIKE '%%', PROJECT_NAME LIKE CONCAT('%', #{project_name}, '%'))
+	</select>
+	
+</mapper>

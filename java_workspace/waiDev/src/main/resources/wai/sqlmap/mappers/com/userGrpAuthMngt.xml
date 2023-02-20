@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.userGrpAuthMngtMapper">
+
+	<!-- USER_GRP_AUTH -->
+	<insert id="registUserGrpAuth" parameterType="hashMap">
+		INSERT INTO USER_GRP_AUTH
+			   (  USER_GRP_ID
+				, AUTH_ID
+				, REG_USER
+				, REG_DATE
+				, UPD_USER
+				, UPD_DATE )
+		VALUES (  #{user_grp_id}
+				, #{auth_id}
+				, #{reg_user}
+				, NOW()
+				, #{upd_user}
+				, NOW() )
+	</insert>
+	
+	<delete id="deleteAuthGrpRel">
+		DELETE FROM USER_GRP_AUTH
+		 WHERE AUTH_ID = #{auth_id}
+	</delete>
+	
+	<delete id="deleteUserGrpAuth">
+		DELETE FROM USER_GRP_AUTH
+		 WHERE USER_GRP_ID = #{user_grp_id}
+		   AND AUTH_ID	   = #{auth_id}
+	</delete>
+
+	<select id="selectUserGrpAuthList" parameterType="hashMap" resultType="hashMap">
+		SELECT A.AUTH_ID
+			 , A.USER_GRP_ID
+			 , G.GRP_NAME
+			 , G.GRP_DESC
+			 , G.REG_USER
+			 , DATE_FORMAT(G.REG_DATE,'%Y-%m-%d %T') REG_DATE
+			 , G.UPD_USER
+			 , DATE_FORMAT(G.UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		  FROM USER_GRP_AUTH A, USER_GRP_BASE G
+		 WHERE A.AUTH_ID = #{auth_id}
+		   AND A.USER_GRP_ID = G.USER_GRP_ID
+	  ORDER BY A.AUTH_ID, G.USER_GRP_ID
+	</select>
+	
+</mapper>

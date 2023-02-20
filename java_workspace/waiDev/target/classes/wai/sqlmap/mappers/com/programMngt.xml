@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.programMngtMapper">
+
+	<!-- PROGRAM_BASE -->
+	<insert id="registProgramBase" parameterType="hashMap">
+			INSERT INTO PROGRAM_BASE 
+				   (  PROJECT_ID
+					, PROGRAM_PATH
+					, PROGRAM_NAME
+					, PROGRAM_TYPE_ID
+					, PROGRAM_DESC
+					, STATUS
+					, PROGRAM_VER
+					, DEL_YN
+					, DEL_DATE
+					, REG_USER
+					, REG_DATE
+					, UPD_USER
+					, UPD_DATE
+					, OP_APPLY_DATE )
+			VALUES (  #{project_id}
+					, #{program_path}
+					, #{program_name}
+					, #{program_type_id}
+					, #{program_desc}
+					, #{status}
+					, #{program_ver}
+					, #{del_yn}
+					, #{del_date}
+					, #{reg_user}
+					, NOW()
+					, #{upd_user}
+					, NOW()
+					, #{op_apply_date} )
+	</insert>
+	
+	<update id="updateProgramBase">
+		UPDATE PROGRAM_BASE
+		   SET PROGRAM_NAME    = #{program_name}
+			 , PROGRAM_TYPE_ID = #{program_type_id}
+			 , PROGRAM_DESC    = #{program_desc}
+			 , STATUS          = #{status}
+			 , PROGRAM_VER     = #{program_ver}
+			 , DEL_YN          = #{del_yn}
+			 , DEL_DATE        = #{del_date}
+			 , UPD_USER        = #{upd_user}
+			 , UPD_DATE        = NOW()
+			 , OP_APPLY_DATE   = #{op_apply_date}
+		 WHERE PROJECT_ID      = #{project_id}
+			 , PROGRAM_PATH    = #{program_path}
+	</update>
+
+	<delete id="deleteProgramBase">
+			DELETE FROM PROGRAM_BASE
+			 WHERE PROJECT_ID   = #{project_id}
+			 	 , PROGRAM_PATH = #{program_path}
+	</delete>
+
+	<select id="selectProgramBaseList" parameterType="hashMap" resultType="hashMap">
+		SELECT PJ.PROJECT_ID
+			 , PJ.PROJECT_NAME
+			 , PG.PROGRAM_PATH 
+			 , PG.PROGRAM_NAME 
+			 , PG.PROGRAM_TYPE_ID
+			 , SUBSTRING_INDEX(PG.PROGRAM_TYPE_ID, '_', 1) PROGRAM_TYPE 
+			 , PG.PROGRAM_DESC 
+			 , PG.STATUS 
+			 , PG.USE_LANG 
+			 , PG.PROGRAM_VER 
+			 , PG.DEL_YN 
+			 , PG.DEL_DATE 
+			 , DATE_FORMAT(PG.OP_APPLY_DATE,'%Y-%m-%d %T') OP_APPLY_DATE
+			 , PG.REG_USER
+			 , DATE_FORMAT(PG.REG_DATE,'%Y-%m-%d %T') REG_DATE
+			 , PG.UPD_USER
+			 , DATE_FORMAT(PG.UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		FROM PROGRAM_BASE PG, PROJECT_BASE PJ
+		WHERE PG.PROJECT_ID = PJ.PROJECT_ID
+		  AND PG.PROJECT_ID = #{project_id}
+		  AND IF(#{program_type_id} = '', PG.PROGRAM_TYPE_ID LIKE '%%', PG.PROGRAM_TYPE_ID LIKE CONCAT('%', #{program_type_id}, '%'))
+		  AND IF(#{program_name} = '', PG.PROGRAM_NAME LIKE '%%', PG.PROGRAM_NAME LIKE CONCAT('%', #{program_name}, '%'))
+		ORDER BY PG.PROGRAM_PATH
+	</select>
+	
+	<select id="selectTestList" parameterType="hashMap" resultType="hashMap">
+		SELECT META_ID
+			 , META_NAME
+			 , META_DESC
+			 , USE_YN
+			 , DATA_TYPE
+			 , DATA_SIZE
+			 , REG_USER
+			 , REG_DATE
+			 , UPD_USER
+			 , UPD_DATE
+		  FROM META_BASE
+		 WHERE META_NAME LIKE CONCAT('%', #{meta_name}, '%')
+		 ORDER BY META_NAME
+	</select>
+	
+</mapper>

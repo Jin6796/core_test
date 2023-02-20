@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.userMngtMapper">
+	<insert id="registUser" parameterType="hashMap">
+		INSERT INTO USER_BASE 
+			   ( USER_ID
+			   , USER_NAME
+			   , PASSWORD
+			   , PHONE
+			   , EMAIL
+			   , ACTIVE_YN
+			   , ADMIN_YN
+			   , REG_USER
+			   , REG_DATE
+			   , UPD_USER
+			   , UPD_DATE )
+		VALUES ( #{user_id}
+			   , #{user_name}
+			   , #{password}
+			   , #{phone}
+			   , #{email}
+			   , #{active_yn}
+			   , #{admin_yn}
+			   , #{reg_user}
+			   , NOW()
+			   , #{upd_user}
+			   , NOW() )
+	</insert>
+
+	<update id="updateUser">
+		UPDATE USER_BASE
+		   SET USER_NAME = #{user_name}
+		   	 , PASSWORD  = #{password}
+		     , PHONE 	 = #{phone}
+		     , EMAIL	 = #{email}
+		     , ACTIVE_YN = #{active_yn}
+		     , UPD_USER  = #{upd_user}
+		     , UPD_DATE  = NOW()
+		 WHERE USER_ID   = #{user_id}
+	</update>
+	
+	<delete id="deleteUser">
+		DELETE FROM USER_BASE
+		 WHERE USER_ID = #{user_id}
+	</delete>
+	
+	<select id="selectUserList" parameterType="hashMap" resultType="hashMap">
+		SELECT USER_ID,
+			   USER_NAME,
+			   PHONE,
+			   EMAIL,
+			   ACTIVE_YN,
+			   DATE_FORMAT(LAST_LOGIN,'%Y-%m-%d %T') LAST_LOGIN,
+			   REG_USER,
+			   DATE_FORMAT(REG_DATE,'%Y-%m-%d %T') REG_DATE,
+			   UPD_USER,
+			   DATE_FORMAT(UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		  FROM USER_BASE
+		 WHERE IF(#{user_id}   = '', USER_ID LIKE '%%',   USER_ID LIKE CONCAT('%', #{user_id}, '%'))
+		   AND IF(#{user_name} = '', USER_NAME LIKE '%%', USER_NAME LIKE CONCAT('%', #{user_name}, '%'))
+		   AND ADMIN_YN = 'N'
+	  ORDER BY USER_ID
+	</select>
+	
+	<select id="selectUserChk" parameterType="hashMap" resultType="hashMap">
+		SELECT *
+		  FROM USER_BASE
+		 WHERE USER_ID = #{user_id}
+	</select>
+	
+	<select id="selectUser" parameterType="hashMap" resultType="hashMap">
+		SELECT USER_ID,
+			   PASSWORD,
+			   ACTIVE_YN,
+			   ADMIN_YN
+		  FROM USER_BASE
+		 WHERE USER_ID  = #{user_id}
+	</select>
+	
+	<update id="updateUserLastLogin" parameterType="hashMap">
+		UPDATE USER_BASE
+		   SET LAST_LOGIN = NOW()
+		 WHERE USER_ID   = #{user_id}
+	</update>
+	
+	<!-- 게시글 목록 불러오기 -->
+	<select id="selectBoardTestList" parameterType="hashMap" resultType="hashMap">
+		SELECT post_id, subject, content, views, reg_user, reg_date, upd_user, upd_date
+		  FROM BOARD_TEST
+		 WHERE SUBJECT LIKE CONCAT('%', #{subject}, '%')
+	</select>
+	
+	<!-- 게시글 상세보기 -->
+	<select id="selectBoardTestDetail" parameterType="hashMap" resultType="hashMap">
+		SELECT post_id, subject, content, views, reg_user, reg_date, upd_user, upd_date
+		  FROM BOARD_TEST
+		WHERE POST_ID=#{post_id};		
+	</select>
+	
+	<!-- 게시글 등록 -->
+	<insert id="selectBoardTestInsert" parameterType="hashMap">
+		INSERT INTO BOARD_TEST
+					(POST_ID, SUBJECT, CONTENT, VIEWS, REG_USER, REG_DATE, UPD_USER, UPD_DATE)
+		VALUES((SELECT AA FROM 
+      		(select CONCAT("POST_",LPAD(SUBSTRING(MAX(POST_ID),6)+1,8,0)) AA from BOARD_TEST) A),
+				#{subject}, #{content}, 0, #{reg_user}, SYSDATE(), '', '');
+	</insert>
+	
+	<!-- 게시글 수정 -->
+	<update id="selectBoardTestUpdate" parameterType="map">
+		UPDATE BOARD_TEST
+		SET SUBJECT=#{subject}, CONTENT=#{content}, UPD_USER=#{upd_user}, UPD_DATE=SYSDATE()
+		WHERE POST_ID=#{post_id};
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<delete id="selectBoardTestDelete">
+		DELETE FROM BOARD_TEST
+		WHERE POST_ID=#{post_id};
+	</delete>
+	
+	<!-- 일별 게시글 조회-->
+	<select id="BoardTestSBday" parameterType="hashMap" resultType="hashMap">
+		SELECT POST_ID, SUBJECT
+		FROM BOARD_TEST
+		WHERE DATE_FORMAT(REG_DATE, '%Y%m%d') = DATE_FORMAT( #{reg_date}, '%Y%m%d');
+	</select>
+	
+	<!-- 일별 작성자 게시글 합계 -->
+	<select id="BoardTestSBdaySelect" parameterType="hashMap" resultType="hashMap">
+		SELECT REG_USER, COUNT(*) CNT
+		FROM BOARD_TEST
+		WHERE DATE_FORMAT(REG_DATE, '%Y%m%d') = DATE_FORMAT( #{reg_date}, '%Y%m%d')
+		GROUP BY REG_USER
+	</select>
+	
+	<!-- 월별 게시글 조회-->
+	<select id="BoardTestSBmonth" parameterType="hashMap" resultType="hashMap">
+		SELECT REG_DATE, COUNT(*) CNT 
+		FROM BOARD_TEST
+		WHERE SUBSTRING(REG_DATE, 1, 7) = SUBSTRING(#{reg_date}, 1, 7)
+		GROUP BY SUBSTRING(REG_DATE, 1, 10)
+	</select>
+	
+	<!-- 월별 작성자 게시글 합계-->
+	<select id="BoardTestSBmonthSelect" parameterType="hashMap" resultType="hashMap">
+		SELECT REG_USER, COUNT(*) CNT 
+		FROM BOARD_TEST
+		WHERE SUBSTRING(REG_DATE, 1, 7) = SUBSTRING(#{reg_date}, 1, 7)
+		GROUP BY REG_USER
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="#">
+    <title>waiDev</title>
+    <link href="/waiDev/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/css/ruang-admin.css" rel="stylesheet">
+
+    <style>
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+
+    <script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script>
+        function searchUser(userId) {
+            var search = document.getElementById("search_dv");
+            var dv = search.options[search.selectedIndex].value;
+            var cont = document.getElementById("search_cont").value;
+            var data = (dv == "id") ? {user_id: cont, user_name: ""} : {user_id: "", user_name: cont};
+            svcCall("userListInquiry", data, callback);
+            function callback(rs) {
+                userGrid.SetData(rs);
+                if (userId) {
+                    for (var i in rs) {
+                        if (userId == rs[i].USER_ID) userGrid.SelectRow(i);
+                    }
+                }
+            };
+        }
+
+        var _chkID = false;
+        var _chkPW = false;
+        function chk_user(e, dv) {
+            var key = e.keyCode == 0 ? e.charCode : e.keyCode;
+            if (chkRegex(dv)) {
+                if (((key == 13)&&(e.type == 'keyup'))||(e.type == 'blur')) {
+                    var userData = {};
+                    var userInp = document.getElementById("user_"+dv);
+                    if (userInp.value && userInp.value.length > 2) {
+                        userData = {["user_"+dv] : userInp.value};
+                        if (dv == "id") {
+                            svcCall("userCheck", userData, callback);
+                            callback(true);
+                            function callback(rs) {
+                                if (rs == true) {
+                                    _chkID = true;
+                                    info_txt('사용 가능합니다.', 'text-primary', 'text-danger');
+                                } else {
+                                    _chkID = false;
+                                    info_txt('사용할 수 없습니다.', 'text-danger', 'text-primary');
+                                }
+                            }
+                        } else if (dv == "pw") {
+                            window["_chk"+dv.toUpperCase()] = true;
+                            $("#"+dv+"_chk_txt").text('');
+                        }
+                    } else {
+                        window["_chk"+dv.toUpperCase()] = false;
+                        var txt = (userInp.value.length < 3) ? '3자 이상 입력하세요.' : '';
+                        info_txt(txt, 'text-danger', 'text-primary');
+                    }
+                } else if(e.type == 'keyup') {
+                    window["_chk"+dv.toUpperCase()] = false;
+                    info_txt('', '', '');
+                }
+            } else {
+                window["_chk"+dv.toUpperCase()] = false;
+                info_txt("사용할 수 없습니다.", "text-danger", "text-primary");
+            }
+
+            function info_txt(txt, addC, rmvC) {
+                $("#"+dv+"_chk_txt").text(txt);
+                $("#"+dv+"_chk_txt").addClass(addC);
+                $("#"+dv+"_chk_txt").removeClass(rmvC);
+            }
+        }
+
+        function chkRegex(dv){
+            var valid = true;
+            var word = $("#user_"+dv).val();
+            var specialChars = (dv == 'id') ? "~`!@#$%^&*+=+\|[](){};:'<.,>/?" : "";
+            var chkWord = word;
+            for (var i = 0; i < chkWord.length; i++) {
+                for (var j = 0; j < specialChars.length; j++) {
+                    if (chkWord.charAt(i) == specialChars.charAt(j)){
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            return valid;
+        }
+
+        function userGridRowClick(e) {
+            clearInput();
+            var uData = userGrid.getSelection();
+            document.getElementById("user_id").value = uData.USER_ID;
+            document.getElementById("user_name").value = uData.USER_NAME;
+            document.getElementById("user_phone").value = uData.PHONE;
+            document.getElementById("user_email").value = uData.EMAIL;
+            document.getElementById("user_active_yn").value = uData.ACTIVE_YN;
+            document.getElementById("user_id").disabled = true;
+        }
+
+        function svcCall_user(dv) {
+        	var tran_dv = document.getElementById("user_id").disabled;
+            var fn = "";
+            var sndData = {};
+            switch (dv) {
+                case "save":
+                	fn = tran_dv ? "Update" : "Regist";
+                    if (!_chkID && !tran_dv) { openModal("Alert", "ID를 확인하세요.", "text-danger", "text-primary"); return; }
+                    if (!_chkPW) { openModal("Alert", "비밀번호를 확인하세요.", "text-danger", "text-primary"); return; }
+                    sndData = {
+                        user_id: document.getElementById("user_id").value,
+                        password: document.getElementById("user_pw").value,
+                        user_name: document.getElementById("user_name").value,
+                        phone: document.getElementById("user_phone").value,
+                        email: document.getElementById("user_email").value,
+                        active_yn: document.getElementById("user_active_yn").value,
+                        reg_user: getLoginUser(),
+                        upd_user: getLoginUser()
+                    };
+                    //console.log("sndData --> ", sndData);
+                    svcCall("user" + fn, sndData, function(rs) {
+                        //console.log("callback -->", rs);
+                        if (rs) {
+                        	if (rs.tran == true) { // success
+                                document.getElementById("search_dv").value = "id";
+                                document.getElementById("search_cont").value = "";
+                                searchUser(sndData.user_id);
+                                clearInput();
+                            }
+                        } else { // error
+                            console.error("[ERROR] Service Transaction error.");
+                        }
+                    });
+                    break;
+                case "del":
+                    var dUsers = userGrid.getCheckedRows();
+                    sndData = {"user_id": []};
+                    for (var i in dUsers) {
+                        sndData.user_id.push(dUsers[i].USER_ID);
+                    }
+                    for (var i in userGrid.gridObj.selectorArr.rows) {
+                        userGrid.SelectRow(userGrid.gridObj.selectorArr.rows[i]);
+                        userGrid.DeleteRow(userGrid.gridObj.selectorArr.rows[i]);
+                        clearInput();
+                    }
+                    //console.log("sndData --> ", sndData);
+                    svcCall("userDelete", sndData, function(rs) {
+                    	//console.log("callback -->", rs);
+                        if (rs == true) { // success
+                            searchUser();
+                            clearInput();
+                        } else { // error
+                            console.error("[ERROR] Service Transaction error.");
+                        }
+                    });
+                    break;
+            }
+            return;
+        }
+
+        function openModal(tit, txt, addC, rmvC) {
+            $("#infoModal").modal({show: true});
+            document.getElementById("infoModal_title").innerText = tit;
+            document.getElementById("infoModal_txt").innerText = txt;
+            $("#infoModal_txt").removeClass(rmvC);
+            $("#infoModal_txt").addClass(addC);
+        }
+
+        function clearInput() {
+            document.getElementById("user_id").value = "";
+            document.getElementById("user_pw").value = "";
+            document.getElementById("user_name").value = "";
+            document.getElementById("user_phone").value = "";
+            document.getElementById("user_email").value = "";
+            document.getElementById("user_active_yn").value = "Y";
+            document.getElementById("user_id").disabled = false;
+            document.getElementById("id_chk_txt").innerText = "";
+            document.getElementById("pw_chk_txt").innerText = "";
+            _chkID = false;
+            _chkPW = false;
+        }
+
+    </script>
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar : Navigation -->
+    <ul class="navbar-nav sidebar sidebar-light" id="navigation"></ul>
+
+    <!-- Main -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- TopBar -->
+            <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" >
+                <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto" id="topBar"></ul>
+            </nav>
+
+            <!-- Container Fluid-->
+            <div class="container-fluid" id="container-wrapper">
+                <div class="d-sm-flex align-items-center justify-content-between">
+                    <h1 class="h4 mb-0 text-gray-800">사용자 관리</h1>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card shadow-sm my-4 mb-4">
+                            <div class="card-body p-2">
+                                <div class="row">
+                                    <div class="col-lg-7">
+                                        <div class="my-3 mb-1">
+                                            <div class="row">
+                                                <div class="col-5">
+                                                    <div class="pl-4 pt-1 d-flex flex-row align-items-center justify-content-between">
+                                                        <h5 class="m-0 font-weight-bold text-primary">User List</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row col-7 ml-2">
+                                                    <div class="col-4 pr-1">
+                                                        <select class="form-control" id="search_dv">
+                                                            <option value="id">User ID</option>
+                                                            <option value="name">User Name</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-8 pl-1 pr-3">
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control bg-light border-1 small" aria-label="Search" aria-describedby="basic-addon2" id="search_cont">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-secondary" type="button" onclick="searchUser()">
+                                                                    <i class="fas fa-search fa-sm"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div class="row">
+                                                    <div class="col-lg-12">
+                                                        <div style="padding: 0.5rem !important;padding-left: 1.2rem !important;">
+                                                            <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+                                                                <grid id="userGrid" style="width: 100%; height:500px;" onrecordclick="userGridRowClick(event)">
+                                                                    "options" : {
+                                                                    "editable":false
+                                                                    ,"columnHeight":41
+                                                                    ,"cellHeight":29
+                                                                    ,"fixColumn":0
+                                                                    ,"conditionalstyle":""
+                                                                    ,"group":""
+                                                                    ,"aggregate":""
+                                                                    ,"appendmode":false
+                                                                    ,"autohiddencols":false
+                                                                    ,"autofit":false
+                                                                    ,"contextmenu":true
+                                                                    ,"indicator":{"show":true,"width":30}
+                                                                    ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+                                                                    ,"columns" : [
+                                                                    {"text":"User ID","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"USER_ID"}
+                                                                    ,{"text":"User Name","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"USER_NAME"}
+                                                                    ,{"text":"Phone / Mobile","alignment":"center","width":100,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PHONE"}
+                                                                    ,{"text":"E-mail","alignment":"center","width":130,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"EMAIL"}
+                                                                    ,{"text":"Active","alignment":"center","width":60,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"ACTIVE_YN"}
+                                                                    ,{"text":"Last Login","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"LAST_LOGIN"}
+                                                                    ,{"text":"Regist User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+                                                                    ,{"text":"Regist Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                                    ,{"text":"Update User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+                                                                    ,{"text":"Update Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                                    ]
+                                                                    ,"style" : {
+                                                                    "light" : {
+                                                                    "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+                                                                    ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+                                                                    }
+                                                                    }
+                                                                    ,"effect":{"columnHighlight":true}
+                                                                    ,"size":{"vertScrollWidth":19}
+                                                                    ,"footer":{"show":true,"height":24}
+                                                                    },
+                                                                    "data":[]
+                                                                </grid>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="default-form my-lg-4">
+                                            <form action="javascript:void(0)" onsubmit="return svcCall_user('save')">
+                                                <div class="form-group">
+                                                    <input type="hidden" name="" id="" value=""/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">User ID</label>
+                                                    <span class="required">*</span>
+                                                    <div class="row">
+                                                        <div class="col-7">
+                                                            <input type="text" class="form-control" id="user_id"
+                                                                   onkeyup="chk_user(event, 'id')"
+                                                                   onblur="chk_user(event, 'id')" required>
+                                                        </div>
+                                                        <div class="col-5 p-0">
+                                                            <h6 class="mt-3 d-flex flex-row align-items-center justify-content-between text-xs"
+                                                                id="id_chk_txt"></h6>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">Password</label>
+                                                    <span class="required">*</span>
+                                                    <div class="row">
+                                                        <div class="col-7">
+                                                            <input type="password" class="form-control" id="user_pw"
+                                                                   onkeyup="chk_user(event, 'pw')"
+                                                                   onblur="chk_user(event, 'pw')" required>
+                                                        </div>
+                                                        <div class="col-5 p-0">
+                                                            <h6 class="mt-3 d-flex flex-row align-items-center justify-content-between text-xs"
+                                                                id="pw_chk_txt"></h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">User Name</label>
+                                                    <input type="text" class="form-control" id="user_name">
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">Phone / Mobile</label>
+                                                    <input type="number" class="form-control" placeholder="번호만 입력"
+                                                           id="user_phone" min="0">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">Email</label>
+                                                    <input type="email" class="form-control" id="user_email"
+                                                           aria-describedby="emailHelp">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="text-sm font-weight-bold">Active</label>
+                                                    <select class="form-control" id="user_active_yn">
+                                                        <option value="Y" selected>Y: Yes</option>
+		                                                <option value="N">N: No</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <input type="button" class="btn btn-secondary"
+                                                                   value="Delete" onclick="svcCall_user('del')">
+                                                        </div>
+                                                        <div class="text-right col-9">
+                                                            <button type="submit" class="btn btn-primary">Save</button>
+                                                            <input type="button" class="btn btn-outline-primary"
+                                                                   onclick="clearInput()" value="Clear">
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Center -->
+        <div id="commonModal" class="row mb-3"></div>
+        <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModal_title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="infoModal_title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body font-weight-bold" id="infoModal_txt"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scroll to top -->
+	    <a class="scroll-to-top rounded" href="#page-top">
+	        <i class="fas fa-angle-up"></i>
+	    </a>
+    </div>
+</div>
+<!--<script src="vendor/jquery/jquery.min.js"></script>-->
+<script src="/waiDev/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/waiDev/vendor/jquery-easing/jquery.easing.min.js"></script>
+<!--<script src="js/ruang-admin.min.js"></script>-->
+<script src="/waiDev/js/ruang-admin.js"></script>
+<script>
+    $(document).ready(function () {
+    	onLoadCommon();
+        searchUser();
+    });
+</script>
+</body>
+</html>

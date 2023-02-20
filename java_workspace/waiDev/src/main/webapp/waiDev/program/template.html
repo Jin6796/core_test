@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="#">
+    <title>waiDev</title>
+    <link href="/waiDev/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/css/ruang-admin.css" rel="stylesheet">
+    <style>
+    select option[value=""][disabled] {
+		display: none;
+	}
+	</style>
+    <script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    
+    <script>
+
+    </script>
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar : Navigation -->
+    <ul class="navbar-nav sidebar sidebar-light" id="navigation"></ul>
+
+    <!-- Main -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- TopBar -->
+            <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" >
+                <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto" id="topBar"></ul>
+            </nav>
+            
+            <!-- Container Fluid-->
+            <div class="container-fluid" id="container-wrapper">
+                <div class="d-sm-flex align-items-center justify-content-between">
+                    <h1 class="h4 mb-0 font-weight-bold text-primary" title="템플릿">Template</h1>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card shadow-sm my-4 mb-4">
+                            <div class="card-body">
+                                <div class="row px-3">
+                                    <div class="col-lg-12 pt-3">
+                                        <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+                                            <grid id="programGrid" style="width: 100%; height:220px;" onrecordclick="userGridRowClick(event)">
+                                                "options" : {
+                                                "editable":false
+                                                ,"columnHeight":41
+                                                ,"cellHeight":29
+                                                ,"fixColumn":0
+                                                ,"conditionalstyle":""
+                                                ,"group":""
+                                                ,"aggregate":""
+                                                ,"appendmode":false
+                                                ,"autohiddencols":false
+                                                ,"autofit":false
+                                                ,"contextmenu":true
+                                                ,"indicator":{"show":true,"width":30}
+                                                ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+                                                ,"columns" : [
+                                                {"text":"Template ID","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"TEMP_SEQ"}
+                                                ,{"text":"Template Name","alignment":"center","width":250,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"TEMP_NAME"}
+                                                ,{"text":"Template Contents","alignment":"center","width":220,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"TEMP_CONT"}
+                                                ,{"text":"Description","alignment":"center","width":350,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"TEMP_DESC"}
+                                                ,{"text":"Delete","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"DEL_YN"}
+                                                ,{"text":"Delete Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"DEL_DATE"}
+                                                ,{"text":"Regist User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"REG_USER"}
+                                                ,{"text":"Regist Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                ,{"text":"Update User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"UPD_USER"}
+                                                ,{"text":"Update Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                ]
+                                                ,"style" : {
+                                                "light" : {
+                                                "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+                                                ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+                                                }
+                                                }
+                                                ,"effect":{"columnHighlight":true}
+                                                ,"size":{"vertScrollWidth":19}
+                                                ,"footer":{"show":true,"height":24}
+                                                },
+                                                "data":[]
+                                            </grid>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="default-form" style="padding-top:.2rem !important;padding-bottom:0 !important">
+                                    <form action="javascript:void(0)" onsubmit="return svcCall_user('reg')">
+                                        <div class="form-group">
+                                            <input type="hidden" name="" id="" value=""/>
+                                        </div>
+                                        <div class="form-group">
+                                        	<div class="row">
+                                        		<div class="col-4 pr-1">
+                                        			<label class="text-sm font-weight-bold">Template ID</label>
+                                            		<input type="text" class="form-control" id="temp_seq" disabled>                                            			
+                                        		</div>
+                                        		<div class="col-4 px-1">
+                                        			<label class="text-sm font-weight-bold">Template Name</label>
+                                            		<input type="text" class="form-control" id="temp_name">                                            			
+                                        		</div>
+                                        	</div>
+                                        </div>
+                                        <div class="form-group">
+                                        	<div class="row">
+                                            	<div class="col-8 pr-1">
+	                                            	<label class="text-sm font-weight-bold">Description</label>
+	                                          		<input type="number" class="form-control" id="temp_desc" >
+                                            	</div>
+                                            	<div class="col-2 px-1">
+                                        			<label class="text-sm font-weight-bold">Delete</label>
+		                                              <select class="form-control" id="del_yn" disabled>
+		                                                  <option value="Y">Y : Yes</option>
+		                                                  <option value="N" selected>N : No</option>
+		                                              </select>     
+                                        		</div>
+                                        		<div class="col-2 pl-1">
+                                        			<label class="text-sm font-weight-bold">Delete Date</label>
+                                        			 <input type="text" class="form-control" id="del_date" disabled>
+                                        		</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                      		<label class="text-sm font-weight-bold">Template Contents</label>
+                                          	<textarea class="form-control" id="temp_cont" style="height:200px;resize:none;"></textarea>                                     			
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <input type="button" class="btn btn-secondary" value="Delete" onclick="svcCall_user('del')">
+                                                </div>
+                                                <div class="text-right col-6">
+                                                    <button type="submit" class="btn btn-primary">Regist</button>
+                                                    <input type="button" class="btn btn-outline-primary" onclick="clearInput()" value="Clear">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Center -->
+        <div id="commonModal" class="row mb-3"></div>
+        
+        <!-- Scroll to top -->
+	    <a class="scroll-to-top rounded" href="#page-top">
+	        <i class="fas fa-angle-up"></i>
+	    </a>
+    </div>
+</div>
+<!--<script src="vendor/jquery/jquery.min.js"></script>-->
+<script src="/waiDev/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/waiDev/vendor/jquery-easing/jquery.easing.min.js"></script>
+<!--<script src="js/ruang-admin.min.js"></script>-->
+<script src="/waiDev/js/ruang-admin.js"></script>
+<script>
+    $(document).ready( function() {
+    	onLoadCommon();
+    });
+</script>
+</body>
+</html>

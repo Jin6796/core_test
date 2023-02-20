@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="#">
+    <title>waiDev</title>
+    <link href="/waiDev/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/css/ruang-admin.css" rel="stylesheet">
+    <style>
+    select option[value=""][disabled] {
+		display: none;
+	}
+	</style>
+    <script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    
+    <script>
+	    
+	    function selectInit() {
+	    	// project
+	    	var data = {project_id: "", project_name: ""};
+	        svcCall("selectProjectBaseList", data, function(rs){
+	        	var html = "";
+		    	var data = rs;
+		    	html += '<option value="" disabled selected>Project</option>';
+		    	for (var i=0; i<data.length; i++) {
+					html += "<option value=" + data[i].PROJECT_ID + ">" + data[i].PROJECT_NAME + "</option>";
+		    	}
+	        	document.getElementById("search_dv_project").innerHTML = html;
+	        });
+	    	
+	    	// program type
+	    	var html = "";
+	    	var data = common_combo_data.program_type;
+	    	html +=  '<option value="" disabled selected>Program Type</option>';
+	    	for (var i=0; i<data.length; i++) {
+				html += "<option value=" + data[i].CODE + ">" + data[i].CODE + " : " + data[i].CODE_NM + "</option>";
+	    	}
+	    	document.getElementById("search_dv_type").innerHTML = html;
+	    	
+	    	// default-form select
+			var selects = $(".default-form select");
+			for (var s=0; s<selects.length; s++) {
+				var html = "";
+	    		var data = common_combo_data[selects[s].id];
+	    		if (data) {
+	    			html +=  '<option value="" disabled selected></option>';
+	    			for (var d=0; d<data.length; d++) {
+	    				html += "<option value=" + data[d].CODE + ">" + data[d].CODE + " : " + data[d].CODE_NM + "</option>";
+	                }
+	    			document.getElementById(selects[s].id).innerHTML = html;
+	    		}
+			}
+		}
+	    
+	    function selectProject() {
+	    	var sel = document.getElementById('search_dv_project');
+	    	var key = sel.value;
+	    	var val = sel.options[sel.selectedIndex].text;
+	    	console.log(key,val);
+	    	
+	    	document.getElementById("project_id").value = key;
+            document.getElementById("project_name").value = val;
+	    }
+	    
+	    function searchProgram(programId) {
+            // var search = document.getElementById("search_dv");
+            // var dv = search.options[search.selectedIndex].value;
+            // var cont = document.getElementById("search_cont").value;
+            // var data = (dv == "id") ? {user_id: cont, user_name: ""} : {user_id: "", user_name: cont};
+            var data = {project_id: "P20220616001", program_type_id:"", program_name: ""};
+            svcCall("selectProgramBaseList", data, callback);
+            function callback(rs) {
+            	console.log("rs:",rs);
+            	programGrid.SetJsonStorage("TYPE001", common_combo_data.program_type);
+            	programGrid.SetJsonStorage("STT001", common_combo_data.program_status);
+            	programGrid.SetData(rs);
+                if (programId) {
+                    for (var i in rs) {
+                        if (programId == rs[i].PROGRAM_ID) { programGrid.SelectRow(i); break; }
+                    }
+                    if (!programGrid.getSelection()) { programGrid.SelectRow(programGrid.GetData().length-1); }
+                    
+                    programGridRowClick();
+                }
+            }
+        }
+	    
+	    function programGridRowClick() {
+	    	var data = programGrid.getSelection();
+            document.getElementById("project_id").value = data.PROJECT_ID;
+            document.getElementById("project_name").value = data.PROJECT_NAME;
+            document.getElementById("program_path").value = data.PROGRAM_PATH;
+            document.getElementById("program_name").value = data.PROGRAM_NAME;
+            document.getElementById("program_type").value = data.PROGRAM_TYPE;
+            document.getElementById("program_desc").value = data.PROGRAM_DESC;
+            document.getElementById("program_status").value = data.STATUS;
+            document.getElementById("program_ver").value = data.PROGRAM_VER;
+            document.getElementById("del_yn").value = data.DEL_YN;
+            document.getElementById("del_date").value = data.DEL_DATE ? data.DEL_DATE : "";
+            document.getElementById("op_apply_date").value = data.OP_APPLY_DATE ? data.OP_APPLY_DATE : "";
+	    }
+	    
+	    function svcCall_save() {
+	    	var fn = document.getElementById("auth_id").value ? "update" : "regist";
+            var sndData = {
+            		project_id: document.getElementById("project_id").value,
+            		program_path: document.getElementById("program_path").value,
+            		program_name: document.getElementById("program_name").value,
+            		program_type_id: document.getElementById("program_type").value,
+            		program_desc: document.getElementById("program_desc").value,
+            		status: document.getElementById("program_status").value,
+            		program_ver: document.getElementById("program_ver").value ? document.getElementById("program_ver").value : "000",
+            		del_yn: document.getElementById("del_yn").value,
+            		del_date: document.getElementById("del_date").value,
+            		op_apply_date: document.getElementById("op_apply_date").value,
+                    reg_user: getLoginUser(),
+                    upd_user: getLoginUser()
+                };
+            console.log("fn --> ", fn);
+            console.log("sndData --> ", sndData);
+            svcCall(fn + "ProgramBase", sndData, function (rs) {
+                console.log("callback -->", rs);
+                if (rs.tran == true) { // success
+                    var pId = sndData.program_path ? sndData.program_path : true;
+                    searchProgram(pId);
+                    clearInput();
+                } else { // error
+                    console.error("[ERROR] Service Transaction error.");
+                }
+            });
+	    }
+	    
+	    function clearInput() {
+            document.getElementById("project_id").value = "";
+            document.getElementById("project_name").value = "";
+            document.getElementById("program_path").value = "";
+            document.getElementById("program_name").value = "";
+            document.getElementById("program_type").value = "";
+            document.getElementById("program_desc").value = "";
+            document.getElementById("program_status").value = "";
+            document.getElementById("program_ver").value = "";
+            document.getElementById("del_yn").value = "N";
+            document.getElementById("del_date").value = "";
+            document.getElementById("op_apply_date").value = "";
+	    }
+    
+    </script>
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar : Navigation -->
+    <ul class="navbar-nav sidebar sidebar-light" id="navigation"></ul>
+
+    <!-- Main -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- TopBar -->
+            <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" >
+                <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto" id="topBar"></ul>
+            </nav>
+            
+            <!-- Container Fluid-->
+            <div class="container-fluid" id="container-wrapper">
+                <div class="d-sm-flex align-items-center justify-content-between">
+                    <h1 class="h4 mb-0 font-weight-bold text-primary" title="프로그램(파일)">Programs</h1>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card shadow-sm my-4 mb-4">
+                            <div class="card-body">
+                                <div class="row px-3">
+                                    <div class="col-4 pr-1">
+                                     	<!-- <label class="text-sm font-weight-bold">Project Name</label> -->
+                                        <select class="form-control" id="search_dv_project" onchange="selectProject()"></select>
+                                    </div>
+                                    <div class="col-4 px-1">
+                                    	<!-- <label class="text-sm font-weight-bold">Program Type</label> -->
+                                        <select class="form-control" id="search_dv_type"></select>
+                                    </div>
+                                    <div class="col-4 pl-1">
+                                    	<!-- <label class="text-sm font-weight-bold">Program Name</label> -->
+                                        <div class="input-group">
+                                            <input type="text" class="form-control bg-light border-1 small" aria-label="Search" aria-describedby="basic-addon2" id="search_dv_program" placeholder="Program Name">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-secondary" type="button" onclick="searchUser()">
+                                                    <i class="fas fa-search fa-sm"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row px-3">
+                                    <div class="col-lg-12 pt-3">
+                                        <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+                                            <grid id="programGrid" style="width: 100%; height:280px;" onrecordclick="programGridRowClick(event)">
+                                                "options" : {
+                                                "editable":false
+                                                ,"columnHeight":41
+                                                ,"cellHeight":29
+                                                ,"fixColumn":0
+                                                ,"conditionalstyle":""
+                                                ,"group":""
+                                                ,"aggregate":""
+                                                ,"appendmode":false
+                                                ,"autohiddencols":false
+                                                ,"autofit":false
+                                                ,"contextmenu":true
+                                                ,"indicator":{"show":true,"width":30}
+                                                ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+                                                ,"columns" : [
+                                                {"text":"Project ID","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"false","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"PROJECT_ID"}
+                                                ,{"text":"Project Name","alignment":"center","width":250,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PROJECT_NAME"}
+                                                ,{"text":"Program Name","alignment":"center","width":220,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PROGRAM_NAME"}
+                                                ,{"text":"Program Path","alignment":"center","width":350,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"PROGRAM_PATH"}
+                                                ,{"text":"Program Type ID","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"false","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PROGRAM_TYPE_ID"}
+                                                ,{"text":"Program Type","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"LookupComboBox","mask":"keyfieldnames : dispField","codeName":"TYPE001","keyfieldnames":"CODE","dispField":"CODE_NM","alignment":"center"},"style":"light","field":"PROGRAM_TYPE"}
+                                                ,{"text":"Description","alignment":"center","width":300,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"PROGRAM_DESC"}
+                                                ,{"text":"Status","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"LookupComboBox","mask":"keyfieldnames : dispField","codeName":"STT001","keyfieldnames":"CODE","dispField":"CODE_NM","alignment":"center"},"style":"light","field":"STATUS"}
+                                                ,{"text":"Version","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"PROGRAM_VER"}
+                                                ,{"text":"Delete","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"DEL_YN"}
+                                                ,{"text":"Delete Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"DEL_DATE"}
+                                                ,{"text":"Apply Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"OP_APPLY_DATE"}
+                                                ,{"text":"Regist User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+                                                ,{"text":"Regist Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                ,{"text":"Update User","alignment":"center","width":90,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+                                                ,{"text":"Update Date","alignment":"center","width":125,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                ]
+                                                ,"style" : {
+                                                "light" : {
+                                                "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+                                                ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+                                                }
+                                                }
+                                                ,"effect":{"columnHighlight":true}
+                                                ,"size":{"vertScrollWidth":19}
+                                                ,"footer":{"show":true,"height":24}
+                                                },
+                                                "data":[]
+                                            </grid>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="default-form" style="padding-top:.2rem !important;padding-bottom:0 !important">
+                                    <form action="javascript:void(0)" onsubmit="return svcCall_save()">
+                                        <div class="form-group">
+                                            <input type="hidden" name="" id="" value=""/>
+                                        </div>
+                                        <div class="form-group d-none">
+                                        	<div class="row">
+                                        		<div class="col-4">
+                                        			<label class="text-sm font-weight-bold">Program ID</label>
+                                            		<input type="text" class="form-control" id="program_id" disabled>                                            			
+                                        		</div>
+                                        		<div class="col-4">
+                                        			<label class="text-sm font-weight-bold">Program Type ID</label>
+                                            		<input type="text" class="form-control" id="program_type_id" disabled>                                            			
+                                        		</div>
+                                        	</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-sm font-weight-bold">Project</label>
+                                        	<div class="row">
+                                        		<div class="col-3 pr-1">
+                                        			<input type="text" class="form-control" id="project_id" disabled>
+                                        		</div>
+                                        		<div class="col-5 pl-1">
+                                        			<input type="text" class="form-control" id="project_name" disabled>
+                                        		</div>
+                                        	</div>
+                                        </div>
+                                        <div class="form-group">
+                                        	<div class="row">
+                                        		<div class="col-3 pr-1">
+                                        			<label class="text-sm font-weight-bold">Program Name</label>
+                                              <span class="required">*</span>
+                                              <input type="text" class="form-control" id="program_name" required>                                     			
+                                        		</div>
+                                        		<div class="col-5 px-1">
+                                        			<label class="text-sm font-weight-bold">Program Path</label>
+                                              <span class="required">*</span>
+                                              <input type="text" class="form-control" id="program_path" required>                                        			
+                                        		</div>
+                                        		<div class="col-2 px-1">
+                                        			<label class="text-sm font-weight-bold">Program Type</label>
+	                                                <select class="form-control" id="program_type"></select>
+                                        		</div>
+                                        		<div class="col-2 pl-1">
+	                                        			<label class="text-sm font-weight-bold">Status</label>
+			                                            <select class="form-control" id="program_status"></select>   
+	                                        		</div>
+                                       		</div>
+                                        </div>
+                                        <div class="form-group">
+	                                        <div class="row">
+                                        		<div class="col-4 pr-1">
+	                                        		<label class="text-sm font-weight-bold">Description</label>
+	                                          		<input type="text" class="form-control" id="program_desc" >
+                                        		</div>
+                                        		<div class="col-2 px-1">
+                                        			<label class="text-sm font-weight-bold">Version</label>
+                                              		<input type="text" class="form-control" id="program_ver" disabled>                                        			
+                                        		</div>
+                                        		
+                                        		<div class="col-2 px-1">
+                                        			<label class="text-sm font-weight-bold">Delete</label>
+		                                            <select class="form-control" id="del_yn" disabled>
+		                                                <option value="Y">Y : Yes</option>
+		                                                <option value="N" selected>N : No</option>
+		                                            </select>     
+                                        		</div>
+                                        		<div class="col-2 px-1">
+                                        			<label class="text-sm font-weight-bold">Delete Date</label>
+                                        			 <input type="datetime" class="form-control" id="del_date" disabled>
+                                        		</div>
+                                        		<div class="col-2 pl-1">
+                                        			<label class="text-sm font-weight-bold">Apply Date</label>
+                                        			 <input type="datetime" class="form-control" id="op_apply_date" disabled>
+                                        		</div>
+	                                        </div>
+                                        </div>
+                                        <div class="form-group">
+                                        	<div class="row">
+                                            	
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <input type="button" class="btn btn-secondary" value="Delete" onclick="svcCall_user('del')">
+                                                    <input type="button" class="btn btn-success" value="Excel Regist" onclick="svcCall_user('excel')">
+                                                </div>
+                                                <div class="text-right col-6">
+                                                    <button type="submit" class="btn btn-primary">Save</button>
+                                                    <input type="button" class="btn btn-outline-primary" onclick="clearInput()" value="Clear">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Center -->
+        <div id="commonModal" class="row mb-3"></div>
+        
+        <!-- Scroll to top -->
+	    <a class="scroll-to-top rounded" href="#page-top">
+	        <i class="fas fa-angle-up"></i>
+	    </a>
+    </div>
+</div>
+<!--<script src="vendor/jquery/jquery.min.js"></script>-->
+<script src="/waiDev/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/waiDev/vendor/jquery-easing/jquery.easing.min.js"></script>
+<!--<script src="js/ruang-admin.min.js"></script>-->
+<script src="/waiDev/js/ruang-admin.js"></script>
+<script>
+    $(document).ready( function() {
+    	onLoadCommon();
+    	selectInit();
+    	searchProgram();
+    });
+</script>
+</body>
+</html>

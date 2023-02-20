@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.metaMngtMapper">
+
+	<!-- META_BASE -->
+	<insert id="registMetaBase" parameterType="hashMap">
+		INSERT INTO META_BASE
+			   (  META_ID
+				, META_NAME
+				, META_DESC
+				, USE_YN
+				, DATA_SIZE
+				, REG_USER
+				, REG_DATE
+				, UPD_USER
+				, UPD_DATE )
+		VALUES (( SELECT CONCAT('M', #{cur_date}, LPAD(COALESCE(CAST(SUBSTR(MAX(M.META_ID), -3) AS INTEGER), 0) + 1, 3, '0')) META_ID
+		   		    FROM META_BASE M
+				   WHERE DATE_FORMAT(M.REG_DATE, '%Y%m%d') LIKE #{cur_date})
+				, #{meta_name}
+				, #{meta_desc}
+				, #{use_yn}
+				, #{data_size}
+				, #{reg_user}
+				, NOW()
+				, #{upd_user}
+				, NOW() )
+	</insert>
+	
+	<update id="updateMetaBase">
+		UPDATE META_BASE
+		   SET META_NAME = #{meta_name}
+			 , META_DESC = #{meta_desc}
+			 , USE_YN    = #{use_yn}
+			 , DATA_SIZE = #{data_size}
+			 , UPD_USER	 = #{upd_user}
+			 , UPD_DATE	 = NOW()
+		 WHERE META_ID 	 = #{meta_id}
+	</update>
+
+	<delete id="deleteMetaBase">
+		DELETE FROM M, R
+			   USING META_BASE AS M
+		   LEFT JOIN META_CODE_REL AS R
+			    	  ON M.META_ID = R.META_ID
+		 	   WHERE M.META_ID = #{meta_id}
+	</delete>
+
+	<select id="selectMetaBaseList" parameterType="hashMap" resultType="hashMap">
+		SELECT META_ID
+			 , META_NAME
+			 , META_DESC
+			 , USE_YN
+			 , DATA_SIZE
+			 , REG_USER
+			 , DATE_FORMAT(REG_DATE,'%Y-%m-%d %T') REG_DATE
+			 , UPD_USER
+			 , DATE_FORMAT(UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+		  FROM META_BASE
+		 WHERE IF(#{meta_id} = '', META_ID LIKE '%%', META_ID LIKE CONCAT('%', #{meta_id}, '%'))
+		   AND IF(#{meta_name} = '', META_NAME LIKE '%%', META_NAME LIKE CONCAT('%', #{meta_name}, '%'))
+	</select>
+	
+</mapper>

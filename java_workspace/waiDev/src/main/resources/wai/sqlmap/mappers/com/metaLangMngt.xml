@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.metaLangMngtMapper">
+
+	<!-- META_LANG -->
+	<insert id="registMetaLang" parameterType="hashMap">
+		INSERT INTO META_LANG
+			   (  META_ID
+				, LANG_DV
+				, LANG_WORD_NAME
+				, LANG_DESC
+				, REG_USER
+				, REG_DATE
+				, UPD_USER
+				, UPD_DATE )
+		VALUES (  #{meta_id}
+				, #{lang_dv}
+				, #{lang_word_name}
+				, #{lang_desc}
+				, #{reg_user}
+				, NOW()
+				, #{upd_user}
+				, NOW() )
+	</insert>
+	
+	<update id="updateMetaLang">
+		UPDATE META_LANG
+		   SET LANG_WORD_NAME = #{lang_word_name}
+			 , LANG_DESC	  = #{lang_desc}
+			 , UPD_USER	 	  = #{upd_user}
+			 , UPD_DATE	 	  = NOW()
+		 WHERE META_ID 	 	  = #{meta_id}
+		   AND LANG_DV	 	  = #{lang_dv}
+	</update>
+
+	<delete id="deleteMetaLang">
+		DELETE FROM META_LANG
+		 WHERE META_ID = #{meta_id}
+		   AND LANG_DV = #{lang_dv}
+	</delete>
+
+	<select id="selectMetaLangList" parameterType="hashMap" resultType="hashMap">
+		SELECT META_ID
+			 , LANG_DV
+			 , LANG_WORD_NAME
+			 , LANG_DESC
+			 , REG_USER
+			 , REG_DATE
+			 , UPD_USER
+			 , UPD_DATE
+		  FROM META_LANG
+		 WHERE META_ID = #{meta_id}
+		   AND LANG_DV = #{lang_dv}
+		   AND IF(#{lang_word_name} = '', LANG_WORD_NAME LIKE '%%', LANG_WORD_NAME LIKE CONCAT('%', #{lang_word_name}, '%'))
+		   AND IF(#{lang_desc} = '', LANG_DESC LIKE '%%', LANG_DESC LIKE CONCAT('%', #{lang_desc}, '%'))
+	</select>
+	
+</mapper>

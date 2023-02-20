@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wai.com.service.impl.projectGrpMngtMapper">
+
+	<!-- PROJECT_GRP -->
+	<insert id="registProjectGrp" parameterType="hashMap">
+			INSERT INTO PROJECT_GRP 
+				   (  PROJECT_ID
+					, USER_GRP_ID
+					, REG_USER
+					, REG_DATE
+					, UPD_USER
+					, UPD_DATE )
+			VALUES (  #{project_id}
+					, #{user_grp_id}
+					, #{reg_user}
+					, NOW()
+					, #{upd_user}
+					, NOW() )
+	</insert>
+	
+	<delete id="deleteProjectGrpRel">
+		DELETE FROM PROJECT_GRP
+		 WHERE PROJECT_ID = #{project_id}
+	</delete>
+	
+	<delete id="deleteProjectGrp">
+			DELETE FROM PROJECT_GRP
+			 WHERE PROJECT_ID  = #{project_id}
+			   AND USER_GRP_ID = #{user_grp_id}
+	</delete>
+
+	<select id="selectProjectGrpList" parameterType="hashMap" resultType="hashMap">
+			SELECT P.PROJECT_ID,
+				   G.USER_GRP_ID,
+				   G.GRP_NAME,
+			       G.GRP_DESC,
+			  	   G.REG_USER,
+			  	   DATE_FORMAT(G.REG_DATE,'%Y-%m-%d %T') REG_DATE,
+			  	   G.UPD_USER,
+			  	   DATE_FORMAT(G.UPD_DATE,'%Y-%m-%d %T') UPD_DATE
+			  FROM PROJECT_GRP P, USER_GRP_BASE G
+			 WHERE P.PROJECT_ID= #{project_id}
+			   AND P.USER_GRP_ID = G.USER_GRP_ID
+		  ORDER BY P.PROJECT_ID, G.USER_GRP_ID
+	</select>
+	
+</mapper>

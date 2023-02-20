@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="#">
+    <title>waiDev</title>
+    <link href="vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="css/ruang-admin.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
+    <!-- <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"> -->
+	<!--    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">-->
+	<!--    <link href="css/ruang-admin.min.css" rel="stylesheet">-->
+	<!-- <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet"> -->
+	
+	<style>
+		.list_title {
+			text-align: left;
+			overflow: hidden;
+		    text-overflow: ellipsis;
+		    white-space: nowrap;
+		}
+	</style>
+	<script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    
+    <script>
+    	var table = null; 
+    	function searchNotice() {
+	        var noticeList = [
+	        	{id: "N20220616001",title: "[공지] 개발서버 형상관리 시스템 사용 안내", reg_user: "관리자", reg_date: "2022-06-16"},	
+	        	{id: "N20220616002",title: "시간 외 적용 시간안내", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616003",title: "개발서버 형상관리 시스템 사용 중단 안내 : 6/19(일) 00:00 - 04:00", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616004",title: "테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트 테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616005",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616006",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616007",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616008",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616009",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616010",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616011",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616012",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616013",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616014",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616015",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"},
+	        	{id: "N20220616016",title: "테스트", reg_user: "관리자", reg_date: "2022-06-16"}
+	        ];
+	        
+	      	table = $('#noticeGrid').DataTable({
+	        	lengthChange: false,
+	        	searching: true,
+	        	ordering: false,
+	        	info: false,
+	        	paging: true,
+	        	displayLength: 10,
+	        	data: noticeList,
+	        	columns: [{"data": "no"},{"data": "title"},{"data": "reg_user"},{"data": "reg_date"}],
+	            columnDefs: [
+	            	{
+		            	targets: 0,
+		           		data: "no",
+		            	render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; },
+		            	searchable: false,
+		            	orderable: false
+	            	}, {
+	            		targets: 1,
+			            createdCell: function (td, cellData, rowData, row, col) {
+			            	$("#notice_header_title").css('width','');
+			              	$(td).html("<div class='list_title'>"+cellData+"</div>");
+			              	$(td).css('max-width', (50 * $("#notice_header_title").width() / window.innerWidth) + "vw");
+		                },
+	                 	searchable: true
+	                }
+	            	, {targets: 2, searchable: false}
+	            	, {targets: 3, searchable: false}
+	            ],
+	            order: [[0, 'asc']],
+	            oLanguage: {"sSearch": ""},
+	            search: {"smart": false},
+	            responsive: true
+	        });
+	      	$("#noticeGrid_filter").find("input").before('<i class="fas fa-search fa-sm"></i>');
+	      	$("#noticeGrid_filter").find("input").attr('placeholder', 'Search...');
+
+	      	regBtnEnable();
+	      	
+	      	$('#noticeGrid tbody').on('click', 'tr', function () {
+	            var data = table.row(this).data();
+	            noticeGridRowClick(data);
+	        });
+    	}
+    	
+    	function regBtnEnable() { // 등록 버튼 활성화
+    		if (checkAdmin()) {
+    			var info = $($('#noticeGrid_wrapper .row')[2]).find(".col-5");
+    			info[0].innerHTML = "<div id = 'noticeGrid_btnDiv'></div>";
+	      		$("#noticeGrid_btnDiv").css('padding', 0);
+		      	$("#noticeGrid_btnDiv").html('<button id="noticeGrid_btnDiv_reg" class="btn btn-primary pull-right">등록</button>');
+		    	$('#noticeGrid_btnDiv_reg').click(function(){
+		    		noticeRegist();
+		    	});	      		
+	      	} else {
+	      		$("#noticeGrid_btnDiv").html('');
+	      	}
+    	}
+    	
+    	function noticeGridRowClick(data) {
+    		console.log(data);
+    		console.log(data.id);
+    	}
+    	
+    	function noticeRegist() {
+    		alert("공지등록");
+    	}
+    	
+    </script>
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar : Navigation -->
+    <div class="sidebar sidebar-light" id="navigation"></div>
+
+    <!-- Main -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- TopBar -->
+            <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" >
+                <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto" id="topBar"></ul>
+            </nav>
+            
+            <!-- Container Fluid-->
+            <div class="container-fluid" id="container-wrapper">
+                <div class="row">
+                	<div class="col-lg-12">
+                       	<div class="card shadow-sm my-4 mb-4">
+                        	<div class="card-body">
+                        		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="padding-bottom: 0 !important;">
+			                  		<h3 class="m-0 font-weight-bold text-primary">Notice</h3>
+			                	</div>
+                        		<div class="row">
+				                	<div class="col-lg-12">
+				                		<div class="table-responsive" style="height: 560px !important;cursor: default;">
+						                  <table class="table responsive nowrap align-items-center table-flush text-center table-hover pb-3" id="noticeGrid" width="100%">
+						                    <thead class="thead-light">
+						                      <tr>
+						                        <th style="width:2%;">No</th>
+						                        <th style="" id="notice_header_title">Title</th>
+						                        <th style="width:15%;">Registered User</th>
+						                        <th style="width:22%;">Registration Data</th>
+						                      </tr>
+						                    </thead>
+						                    <tbody id="notice_tbody" class="small"></tbody>
+						                  </table>
+						                </div>
+	                                </div>
+				                </div>
+			              	</div>
+			        	</div>
+			    	</div>
+            	</div>
+        	</div>
+    	</div>
+
+		<!-- Modal Center -->
+	    <div id=commonModal class="row mb-3"></div>
+	    
+	    <!-- Modal Scrollable -->
+          <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog"
+            aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalScrollableTitle">Modal scrollable title</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <h5 class="font-weight-bold">Title</h5>
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua. Ac orci phasellus egestas tellus rutrum tellus. Suspendisse sed nisi lacus
+                    sed. Erat pellentesque adipiscing commodo elit at imperdiet dui. Eget dolor morbi non arcu risus
+                    quis varius quam. Elit ullamcorper dignissim cras tincidunt. At risus viverra adipiscing at in
+                    tellus integer feugiat. Dictum non consectetur a erat nam at lectus urna. Est velit egestas dui id.
+                    Sed id semper risus in hendrerit. Malesuada fames ac turpis egestas maecenas pharetra convallis
+                    posuere. Pretium vulputate sapien nec sagittis aliquam. In hendrerit gravida rutrum quisque non.
+                    Neque ornare aenean euismod elementum nisi quis eleifend quam adipiscing. Lacus luctus accumsan
+                    tortor posuere. Urna molestie at elementum eu facilisis. Neque egestas congue quisque egestas diam.
+                    Turpis egestas integer eget aliquet nibh praesent. Egestas dui id ornare arcu odio ut.</p>
+                  <h5 class="font-weight-bold">Title</h5>
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua. Lacinia quis vel eros donec. Nec tincidunt praesent semper feugiat nibh sed
+                    pulvinar proin gravida. Urna cursus eget nunc scelerisque viverra mauris in. Risus sed vulputate
+                    odio ut enim blandit volutpat maecenas. Etiam sit amet nisl purus in mollis nunc. Aliquet bibendum
+                    enim facilisis gravida neque convallis a. Aliquam id diam maecenas ultricies mi eget mauris. Et
+                    malesuada fames ac turpis egestas sed. Venenatis cras sed felis eget.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+	    
+	    <!-- Scroll to top -->
+	    <a class="scroll-to-top rounded" href="#page-top">
+	        <i class="fas fa-angle-up"></i>
+	    </a>
+	</div>
+</div>
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+<!--<script src="js/ruang-admin.min.js"></script>-->
+<script src="js/ruang-admin.js"></script>
+<!-- Page level plugins -->
+<script src="vendor/datatables/jquery.dataTables.js"></script>
+<script src="vendor/datatables/dataTables.bootstrap4.js"></script>
+<script>
+    $(document).ready( function() {
+    	onLoadCommon();
+        searchNotice();
+    });
+</script>
+</body>
+</html>

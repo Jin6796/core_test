@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="#">
+    <title>waiDev</title>
+    <link href="/waiDev/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/waiDev/css/ruang-admin.css" rel="stylesheet">
+    <style>
+    select option[value=""][disabled] {
+		display: none;
+	}
+	input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+	</style>
+    <script src="/wai/wai.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    
+    <script>
+    	function searchMeta(metaId) {
+    		clearInput();
+    		var searchVal = document.getElementById("search_dv_meta").value;
+	        var data = {meta_id: "", meta_name: searchVal};
+//             svcCall("selectMetaBaseList", data, callback);
+            svcCall("selectMetaCodeRelList", data, callback);
+            
+            function callback(rs) {
+            	metaGrid.SetData(rs);
+                if (metaId) {
+                    for (var i in rs) {
+                        if (metaId == rs[i].META_ID) { metaGrid.SelectRow(i); break; }
+                    }
+                    if (!metaGrid.getSelection()) { metaGrid.SelectRow(metaGrid.GetData().length-1); }
+                    
+                    metaGridRowClick();
+                }
+            }
+    	}
+    	
+    	function metaGridRowClick() {
+	        var data = metaGrid.getSelection();
+	        document.getElementById("meta_id").value = data.META_ID;
+	        document.getElementById("meta_name").value = data.META_NAME;
+	        document.getElementById("meta_desc").value = data.META_DESC;
+	        document.getElementById("use_yn").value = data.USE_YN;
+	        document.getElementById("data_size").value = data.DATA_SIZE;
+	        
+    		var cdData = {code_id: data.CODE_ID, code_name: ""};
+	    	svcCall("selectMetaCodeDetailList", cdData, callback);
+	    	function callback(rs) {
+	    		if (rs.length > 0) {
+	    			var codeDtList = groupBy(rs, "CODE_ID");
+		        	codeGrid.SetData(codeDtList[data.CODE_ID]);		    			
+	    		} else {
+	    			codeGrid.clear();
+	    		}
+	        }
+	    }
+    	
+    	function svcCall_save(dv) {
+        	switch(dv) {
+	        	case "M": // Meta
+	        		var fn = document.getElementById("meta_id").value ? "update" : "regist";
+	                var sndData = {
+	                		meta_id: document.getElementById("meta_id").value,
+	                        meta_name: document.getElementById("meta_name").value,
+	                        meta_desc: document.getElementById("meta_desc").value,
+	                        use_yn: document.getElementById("use_yn").value,
+	                        data_size: document.getElementById("data_size").value,
+	                        reg_user: getLoginUser(),
+	                        upd_user: getLoginUser()
+	                    };
+	                //console.log("fn --> ", fn);
+	                //console.log("sndData --> ", sndData);
+	                svcCall(fn + "MetaBase", sndData, function (rs) {
+	                    console.log("callback -->", rs);
+	                    if (rs.tran == true) { // success
+	                        var mId = sndData.meta_id ? sndData.meta_id : true;
+	                        searchMeta(mId);
+	                        clearInput();
+	                    } else { // error
+	                        console.error("[ERROR] Service Transaction error.");
+	                    }
+	                });
+	        		break;
+	        	case "C": // Code
+	        		var getSel = codeListGrid.getSelection();
+	        		if (!getSel) return;
+	        		
+	        		var cd_id = getSel.CODE_ID;
+	        		var data = {
+	        			meta_id: document.getElementById("meta_id").value,
+        				code_id: getSel.CODE_ID,
+        				reg_user: getLoginUser(),
+        				upd_user: getLoginUser()
+	        		};
+	        		svcCall("registMetaCodeRel", data, function(rs) {
+	        			console.log("rs:",rs);
+	        			if (rs) {
+	        				if (rs.tran == true) { // success
+	        					searchMeta(data.meta_id);
+		            			closeModal();
+		            		}
+	        			} else { // error
+	                        console.error("[ERROR] Service Transaction error.");
+	                    }
+	            	});
+	        		break;
+        	}
+        }
+    	
+    	function svcCall_del(dv) {
+        	var sndData = null;
+        	switch(dv) {
+	        	case "M": // Meta
+	        		var dMetas = metaGrid.getCheckedRows();
+	        		if(dMetas.length < 1) return;
+                    sndData = {"meta_id": []};
+                    for (var i in dMetas) {
+                        sndData.meta_id.push(dMetas[i].META_ID);
+                    }
+                    for (var i in metaGrid.gridObj.selectorArr.rows) {
+                    	metaGrid.SelectRow(metaGrid.gridObj.selectorArr.rows[i]);
+                    	metaGrid.DeleteRow(metaGrid.gridObj.selectorArr.rows[i]);
+                        clearInput();
+                    }
+//                     console.log("sndData --> ", sndData);
+                    svcCall("deleteMetaBase", sndData, function (rs) {
+                        console.log("callback -->", rs);
+                        if (rs == true) { // success
+                        	searchMeta();
+                            clearInput();
+                        } else { // error
+                            console.error("[ERROR] Service Transaction error.");
+                        }
+                    });
+	        		break;
+	        	case "C": // Code
+	        		var row = metaGrid.getSelection();
+	        		if(!row || !row.CODE_ID) return;
+	                sndData = {"meta_id": row.META_ID, "code_id": row.CODE_ID};
+// 	                console.log("sndData --> ", sndData);
+	                svcCall("deleteMetaCodeRel", sndData, callback);
+	                function callback(rs) {
+	                    if (rs == true) { // success
+	                    	codeGrid.clear();
+	                    	searchMeta(row.META_ID);
+	                    } else { // error
+	                        console.error("[ERROR] Service Transaction error.");
+	                    }
+	                };
+	        		break;
+        	}
+            return;
+        }
+    
+    	function openModal(tit, txt, addC, rmvC) {
+        	if (!metaGrid.getSelection()) return;
+            $("#addListModal").modal({show: true});
+            loadCode();
+        }
+    	
+    	function closeModal() {
+        	$("#addListModal").modal('hide');
+        }
+    	 
+    	var codeDtList = null;
+	    function loadCode(codeId) {
+	    	codeDtList = null;
+	    	codeListGrid.clear();
+	    	codeDtListGrid.clear();
+	    	
+	        console.log('CODE_ID:',metaGrid.getSelection().CODE_ID);
+	        
+	        var data = {code_id: "", code_name: ""};
+	        svcCall("selectMetaCodeList", data, callback);
+	        function callback(rs) {
+	        	console.log(rs);
+
+	        	codeDtList = groupBy(rs.codeDtList, "CODE_ID");
+	        	codeListGrid.SetData(rs.codeIdList);
+	        	var codeId = metaGrid.getSelection().CODE_ID;
+	            if (codeId) {
+	                for (var i in rs.codeIdList) {
+	                    if (codeId == rs.codeIdList[i].CODE_ID) { codeListGrid.SelectRow(i); break; }
+	                }
+	                if (!codeListGrid.getSelection()) { codeListGrid.SelectRow(codeGrid.GetData().length-1); }
+	                codeListGridRowClick();
+	            }
+	        }
+	    }
+    	 
+    	function codeListGridRowClick() {
+    		var data = codeListGrid.getSelection();
+    		codeDtListGrid.SetData(codeDtList[data.CODE_ID]);
+    	}
+    	
+    	function clearInput() {
+    		document.getElementById("meta_id").value = "";
+    		document.getElementById("meta_name").value = "";
+            document.getElementById("meta_name").value = "";
+            document.getElementById("meta_desc").value = "";
+            document.getElementById("use_yn").value = "Y";
+            document.getElementById("data_size").value = "";
+            codeGrid.clear();
+        }
+    </script>
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <!-- Sidebar : Navigation -->
+    <ul class="navbar-nav sidebar sidebar-light" id="navigation"></ul>
+
+    <!-- Main -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <!-- TopBar -->
+            <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" >
+                <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <ul class="navbar-nav ml-auto" id="topBar"></ul>
+            </nav>
+            
+            <!-- Container Fluid-->
+            <div class="container-fluid" id="container-wrapper">
+                <div class="d-sm-flex align-items-center justify-content-between">
+                    <h1 class="h4 mb-0 text-gray-800">표준메타</h1>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card shadow-sm my-4 mb-4">
+                            <div class="card-body p-2">
+                                <div class="row">
+                                	<div class="col-lg-7">
+	                                    <div class="my-3 mb-1">
+	                                    	<div class="row pr-3">
+	                                            <div class="col-6">
+	                                                <div class="pl-4 pt-1 d-flex flex-row align-items-center justify-content-between">
+	                                                    <h5 class="m-0 font-weight-bold text-primary">Mata Data</h5>
+	                                                </div>
+	                                            </div>
+	                                            <div class="col-6">
+	                                            	<div class="input-group">
+			                                            <input type="text" class="form-control bg-light border-1 small" aria-label="Search" aria-describedby="basic-addon2" id="search_dv_meta" placeholder="Meta Name">
+			                                            <div class="input-group-append">
+			                                                <button class="btn btn-secondary" type="button" onclick="searchMeta()">
+			                                                    <i class="fas fa-search fa-sm"></i>
+			                                                </button>
+			                                            </div>
+			                                        </div>
+	                                            </div>
+	                                        </div>
+	                                        <div class="row px-3">
+                                    <div class="col-lg-12 pt-3">
+                                        <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+                                            <grid id="metaGrid" style="width: 99.9%; height:350px;" onrecordclick="metaGridRowClick(event)">
+                                                "options" : {
+                                                "editable":false
+                                                ,"columnHeight":41
+                                                ,"cellHeight":29
+                                                ,"fixColumn":0
+                                                ,"conditionalstyle":""
+                                                ,"group":""
+                                                ,"aggregate":""
+                                                ,"appendmode":false
+                                                ,"autohiddencols":false
+                                                ,"autofit":false
+                                                ,"contextmenu":true
+                                                ,"indicator":{"show":true,"width":30}
+                                                ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+                                                ,"columns" : [
+                                                {"text":"Meta ID","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"META_ID"}
+                                                ,{"text":"Meta Name","alignment":"center","width":150,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"META_NAME"}
+                                                ,{"text":"Description","alignment":"center","width":200,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"META_DESC"}
+                                                ,{"text":"Use","alignment":"center","width":80,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"USE_YN"}
+                                                ,{"text":"Data Size","alignment":"center","width":80,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"DATA_SIZE"}
+                                                ,{"text":"Code ID","alignment":"center","width":100,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"CODE_ID"}
+                                                ,{"text":"Code ID Name","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"CODE_ID_NAME"}
+                                                ,{"text":"Regist User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+                                                ,{"text":"Regist Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                ,{"text":"Update User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+                                                ,{"text":"Update Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                ]
+                                                ,"style" : {
+                                                "light" : {
+                                                "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+                                                ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+                                                }
+                                                }
+                                                ,"effect":{"columnHighlight":true}
+                                                ,"size":{"vertScrollWidth":19}
+                                                ,"footer":{"show":true,"height":24}
+                                                },
+                                                "data":[]
+                                            </grid>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="default-form" style="padding-top:.2rem !important;padding-bottom:0 !important">
+                                    <form action="javascript:void(0)" onsubmit="return svcCall_save('M')">
+                                        <div class="form-group">
+                                            <input type="hidden" name="" id="" value=""/>
+                                        </div>
+                                        <div class="form-group">
+                                        	<div class="row">
+                                        		<div class="col-3 pr-1">
+                                        			<label class="text-sm font-weight-bold">Meta ID</label>
+		                                       		<input type="text" class="form-control" id="meta_id" disabled>   
+                                        		</div>
+                                        		<div class="col-5 px-1">
+                                        			<label class="text-sm font-weight-bold">Meta Name</label>
+                                        			<span class="required">*</span>
+                                        			<input type="text" class="form-control" id="meta_name" required>                                     			
+                                        		</div>
+                                        		<div class="col-2 px-1">
+                                        			<label class="text-sm font-weight-bold">Use</label>
+		                                            <select class="form-control" id="use_yn">
+		                                                <option value="Y" selected>Y : Yes</option>
+		                                                <option value="N">N : No</option>
+		                                            </select>     
+                                        		</div>
+                                        		<div class="col-2 pl-1">
+                                        			<label class="text-sm font-weight-bold">Data Size</label>
+                                        			 <input type="number" class="form-control" id="data_size">
+                                        		</div>
+                                       		</div>
+                                        </div>
+                                        <div class="form-group">
+                                       		<label class="text-sm font-weight-bold">Description</label>
+                                        	<input type="text" class="form-control" id="meta_desc" >
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <input type="button" class="btn btn-secondary" value="Delete" onclick="svcCall_del('M')">
+                                                </div>
+                                                <div class="text-right col-6">
+                                                    <button type="submit" class="btn btn-primary">Save</button>
+                                                    <input type="button" class="btn btn-outline-primary" onclick="clearInput()" value="Clear">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+	                                	</div>
+	                                </div>
+	                                <div class="col-lg-5">
+                                    	<div class="pt-3 pl-3 d-flex flex-row align-items-center justify-content-between">
+                                            <h5 class="m-0 font-weight-bold text-primary">Code</h5>
+                                        </div>
+                                        <div class="default-form">
+                                            <div class="mb-1">
+                                                <div class="card-body p-0 pr-2">
+                                                    <div class="row">
+                                                        <div class="col-12 pr-2" style="padding-top: 7px !important;">
+                                                            <div style="width:100%;height:100%;border:1px solid #d1d3e2;">
+                                                            	<grid id="codeGrid" style="width: 100%; height:500px;">
+					                                                "options" : {
+					                                                "editable":false
+					                                                ,"columnHeight":41
+					                                                ,"cellHeight":29
+					                                                ,"fixColumn":0
+					                                                ,"conditionalstyle":""
+					                                                ,"group":""
+					                                                ,"aggregate":""
+					                                                ,"appendmode":false
+					                                                ,"autohiddencols":false
+					                                                ,"autofit":false
+					                                                ,"contextmenu":true
+					                                                ,"indicator":{"show":true,"width":30}
+					                                                ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+					                                                ,"columns" : [
+					                                                {"text":"Code ID","alignment":"center","width":100,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"CODE_ID"}
+					                                                ,{"text":"Code ID Name","alignment":"center","width":150,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"CODE_ID_NAME"}
+					                                                ,{"text":"Code","alignment":"center","width":150,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"CODE"}
+					                                                ,{"text":"Code Name Name","alignment":"center","width":200,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"CODE_NAME"}
+					                                                ,{"text":"Regist User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+					                                                ,{"text":"Regist Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+					                                                ,{"text":"Update User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+					                                                ,{"text":"Update Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+					                                                ]
+					                                                ,"style" : {
+					                                                "light" : {
+					                                                "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+					                                                ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+					                                                }
+					                                                }
+					                                                ,"effect":{"columnHighlight":true}
+					                                                ,"size":{"vertScrollWidth":19}
+					                                                ,"footer":{"show":true,"height":24}
+					                                                },
+					                                                "data":[]
+					                                            </grid>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right col-12 my-3 pr-0">
+		                                                <button type="submit" class="btn btn-primary" onclick="openModal()">Code Assign</button>
+		                                                <button type="submit" class="btn btn-secondary" onclick="svcCall_del('C')">Code Delete</button>
+		                                            </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Center -->
+        <div id="commonModal" class="row mb-3"></div>
+        
+        <div class="modal fade" id="addListModal" tabindex="-1" role="dialog" aria-labelledby="addListModal_title" aria-modal="true" style="">
+	        <div class="modal-dialog modal-dialog-scrollable" role="document" style="max-width: 60vw;">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <h5 class="modal-title" id="addListModal_title">Code Assignment</h5>
+	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                        <span aria-hidden="true">×</span>
+	                    </button>
+	                </div>
+	                <div class="modal-body">
+	                    <div class="row">
+	                        <div class="col-6">
+	                            <h5 class="font-weight-bold pl-4">Code</h5>
+	                            <div class="row">
+	                                <div class="col-12 pl-4 pr-2">
+	                                    <div style="width:99.9%;height:100%;border:1px solid #d1d3e2;">
+	                                        <grid id="codeListGrid" style="width: 100%; height:572px;" onrecordclick="codeListGridRowClick()">
+	                                            "options" : {
+	                                            "editable":false
+	                                            ,"columnHeight":41
+	                                            ,"cellHeight":29
+	                                            ,"fixColumn":0
+	                                            ,"conditionalstyle":""
+	                                            ,"group":""
+	                                            ,"aggregate":""
+	                                            ,"appendmode":false
+	                                            ,"autohiddencols":false
+	                                            ,"autofit":false
+	                                            ,"contextmenu":true
+	                                            ,"indicator":{"show":true,"width":30}
+	                                            ,"selector":{"show":false
+	                                            ,"width":20,"checked":"none","type":"check"}
+	                                            ,"columns" :[
+                                                {"text":"Code ID","alignment":"center","width":150,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"CODE_ID"}
+                                                ,{"text":"Code ID Name","alignment":"center","width":200,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"CODE_ID_NAME"}
+                                                ,{"text":"Regist User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+                                                ,{"text":"Regist Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                ,{"text":"Update User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+                                                ,{"text":"Update Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                ]
+	                                            ,"style" : {
+	                                            "light" : {
+	                                            "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+	                                            ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+	                                            }
+	                                            }
+	                                            ,"effect":{"columnHighlight":true}
+	                                            ,"size":{"vertScrollWidth":19}
+	                                            ,"footer":{"show":true,"height":24}
+	                                            },
+	                                            "data":[]
+	                                        </grid>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                        <div class="col-6">
+	                            <h5 class="font-weight-bold">Code Detail</h5>
+	                            <div class="row">
+	                                <div class="col-12">
+	                                    <div style="width:99.9%;height:100%;border:1px solid #d1d3e2;">
+	                                        <grid id="codeDtListGrid" style="width: 100%; height:572px;">
+	                                            "options" : {
+	                                            "editable":false
+	                                            ,"columnHeight":41
+	                                            ,"cellHeight":29
+	                                            ,"fixColumn":0
+	                                            ,"conditionalstyle":""
+	                                            ,"group":""
+	                                            ,"aggregate":""
+	                                            ,"appendmode":false
+	                                            ,"autohiddencols":false
+	                                            ,"autofit":false
+	                                            ,"contextmenu":true
+	                                            ,"indicator":{"show":true,"width":30}
+	                                            ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+	                                            ,"columns" :[
+                                                {"text":"Code","alignment":"center","width":100,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"CODE"}
+                                                ,{"text":"Code Name","alignment":"center","width":150,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"left"},"style":"light","field":"CODE_NAME"}
+                                                ,{"text":"Regist User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_USER"}
+                                                ,{"text":"Regist Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"REG_DATE"}
+                                                ,{"text":"Update User","alignment":"center","width":120,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_USER"}
+                                                ,{"text":"Update Date","alignment":"center","width":180,"type":"column","height":40,"editable":"false","visible":"true","sortable":true,"sortType":"string","editor":{"type":"text","alignment":"center"},"style":"light","field":"UPD_DATE"}
+                                                ]
+	                                            ,"style" : {
+	                                            "light" : {
+	                                            "header":{"color":"#eaecf4","font":{"style":"normal","variant":"normal","weight":"bold","size":"13","lineHeight":"normal","family":"Nunito","color":"#5f616e","text":"bold 13px Nunito"}}
+	                                            ,"cell":{"color":"#ffffff","font":{"style":"normal","variant":"normal","weight":"normal","size":"12","lineHeight":"normal","family":"Arial","color":"#757575","text":"normal 12px Arial"}}
+	                                            }
+	                                            }
+	                                            ,"effect":{"columnHighlight":false}
+	                                            ,"size":{"vertScrollWidth":19}
+	                                            ,"footer":{"show":true,"height":24}
+	                                            },
+	                                            "data":[]
+	                                        </grid>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-primary" onclick="svcCall_save('C')">Save</button>
+	                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+        <!-- Scroll to top -->
+	    <a class="scroll-to-top rounded" href="#page-top">
+	        <i class="fas fa-angle-up"></i>
+	    </a>
+    </div>
+</div>
+<script src="/waiDev/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/waiDev/vendor/jquery-easing/jquery.easing.min.js"></script>
+<script src="/waiDev/js/ruang-admin.js"></script>
+<script>
+    $(document).ready( function() {
+    	onLoadCommon();
+    	searchMeta();
+    });
+</script>
+</body>
+</html>
